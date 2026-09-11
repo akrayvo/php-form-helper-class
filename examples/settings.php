@@ -3,7 +3,7 @@
 // include the class file and create a new object.
 require_once('../FormHelper.php');
 
-$form = new FormDisplay();
+$form = new FormHelper();
 
 ?><!DOCTYPE html>
 <html lang="en">
