@@ -312,8 +312,7 @@ class FormHelper
             }
         }
 
-        $html = $this->input('checkbox', $name, $value, $moreAttributes);
-        return $this->htmlOutputOrReturn($html);
+        return $this->input('checkbox', $name, $value, $moreAttributes);
     }
 
     /**
@@ -325,7 +324,7 @@ class FormHelper
      */
     public function radio($name, $value, $selectedValue = null, $moreAttributes = array())
     {
-        if ($value !== null && $selectedValue !== null) {
+        if ($value !== null && $selectedValue !== null && $value == $selectedValue) {
             if ($this->isXhtml) {
                 $moreAttributes['checked'] = 'checked';
             } else {
@@ -333,8 +332,7 @@ class FormHelper
             }
         }
 
-        $html = $this->input('radio', $name, $value, $moreAttributes);
-        return $this->htmlOutputOrReturn($html);
+        return $this->input('radio', $name, $value, $moreAttributes);
     }
 
     /**
@@ -472,8 +470,8 @@ class FormHelper
     /**
      * <input type="submit">
      * 
-     * unlike other functions, $value comes before $name because
-     * the button value is generally more important than its name.
+     * unlike other functions, $value comes before $name because the button 
+     * value (text that displays on the button) is generally more important than its name.
      */
     public function submit($value = '', $name = '',  $moreAttributes = array())
     {
@@ -487,15 +485,14 @@ class FormHelper
             $value = 'Submit';
         }
 
-        $moreAttributes = $this->combineAttributes($moreAttributes);
-
         return $this->input('submit', $name, $value, $moreAttributes);
     }
 
     /**
      * <input type="reset">
      * 
-     * unlike other functions, the $value parameter is after $name
+     * unlike other functions, $value comes before $name because the button 
+     * value (text that displays on the button) is generally more important than its name.
      */
     public function reset($value = '', $name = '',  $moreAttributes = array())
     {
@@ -509,8 +506,6 @@ class FormHelper
             $value = 'Reset';
         }
 
-        $moreAttributes = $this->combineAttributes($moreAttributes);
-
         return $this->input('reset', $name, $value, $moreAttributes);
     }
 
@@ -519,7 +514,7 @@ class FormHelper
      */
     public function button($html = 'Submit', $moreAttributes = array())
     {
-        // note that html is not escaped. this will allow images
+        // note that html is not escaped. this will allow images or other html inside of the button
         $html = '<button' . $this->attributeArrayToString($moreAttributes) . '>' .
             $html .
             '</button>';
