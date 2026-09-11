@@ -654,6 +654,8 @@ class FormHelper
             'name' => $name
         ];
 
+        $attributes = $this->combineAttributes($attributes, $moreAttributes);
+
         $html = '<select' . $this->attributeArrayToString($attributes) . '>';
 
         foreach ($options as $optionValue => $display) {
