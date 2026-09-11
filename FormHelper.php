@@ -660,6 +660,9 @@ class FormHelper
                     $this->attributeArrayToString(['label' => $optionValue]) .
                     '>';
                 foreach ($display as $groupOptionValue => $groupOptionDisplay) {
+                    if ($this->doSelectOptionValueEqualsText) {
+                        $groupOptionValue = $groupOptionDisplay;
+                    }
                     $html .= $this->selectOption(
                         $groupOptionDisplay,
                         $groupOptionValue,
@@ -682,18 +685,18 @@ class FormHelper
 
     /**
      * <select>
-     * $records is a 2 dimensional array, such as resuls from a database query
+     * $records is a 2 dimensional array, such as results from a database query
      * example [ ['id'=>123, 'name'=>'Bob Jones', 'email'=>'bob@test.com'],
      *      ['id'=>356, 'name'=>'Jim Smith', 'email'=>'jim@test.com']]
      * $valueKey and $displayKey are the keys in each record for the value and
      *      display text for each html option
-     * $valueKey='id', $displayKey='name' will ouput 
+     * $valueKey='id', $displayKey='name' will output 
      *      <option value="123">Bob Jones</option><option value="356">Jim Smith</option>
      * $emptyText is the optional first empty option in the dropdown menu. used to
      *      keep the first option from being selected when the form is loaded and/or to
      *      allow a field to be skipped.
-     * $emptyText = 'Select An Item' will make the first option 
-     *      <option value="Select An Item"></option>
+     * $emptyText = 'Select An Item' will add a new first option 
+     *      <option value="">Select An Item</option>
      * if $emptyText is empty, no additional option will be added
      */
     public function selectByRecordSet(
