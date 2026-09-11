@@ -58,9 +58,8 @@ class FormHelper
     {
         if ($value) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     public function setDoAddIdAttributeFromName($value)
@@ -106,7 +105,7 @@ class FormHelper
      */
     public function htmlEscape($string)
     {
-        return htmlspecialchars($string);
+        return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
     }
 
     /**
@@ -122,38 +121,38 @@ class FormHelper
             return '';
         }
 
-        $booleanAttributes = [];
-
+        $addedAttributes = array();
         $attributeString = '';
+
         foreach ($attributes as $name => $value) {
-            $attributeString .= $this->attributeToString($name, $value);
+            if (is_null($value)) {
+                continue;
+            }
+
+            $value = $this->htmlEscape($value);
+
+            if (is_int($name)) {
+                // numeric keys are treated as a non-associative array.
+                // so attributes without a value can be specified this way (readonly, disabled) 
+                
+                if (!in_array($value, $addedAttributes)) {
+                    $addedAttributes[] = $value;
+                    if ($this->isXhtml) {
+                        $attributeString .= ' ' . $value. '="'.$value.'"';
+                    } else {
+                        $attributeString .= ' ' . $value;
+                    }
+                }
+            } else {
+                $name = $this->htmlEscape($name);
+                if (!in_array($name, $addedAttributes)) {
+                    $addedAttributes[] = $name;
+                    $attributeString .= ' ' . $name . '="' . $value . '"';
+                }
+            }
         }
 
         return $attributeString;
-    }
-
-    private function attributeToString($name, $value)
-    {
-        if (is_null($value)) {
-            return '';
-        }
-
-        if (is_int($name)) {
-            // numeric keys are treated as non associatve array.
-            // so attriubes with no value, will be set this way (readonly, disabled) 
-            $booleanAttribute = $this->htmlEscape($value);
-            $booleanAttributes = [];
-            if (!in_array($booleanAttribute, $booleanAttributes)) {
-                $booleanAttributes[] = $booleanAttribute;
-                if ($this->isXhtml) {
-                    return ' ' . $booleanAttribute. '="'.$booleanAttribute.'"';
-                }
-                
-                return ' ' . $booleanAttribute;
-            }
-        }
-        return ' ' . $this->htmlEscape($name) . '="' . $this->htmlEscape($value) . '"';
-
     }
 
     /**
@@ -197,9 +196,9 @@ class FormHelper
      * combines the attributes created in this class with ones passed as parameters
      * adds the id attribute if needed
      */
-    private function combineAttributes($mainAttributes, $moreAttributes = [])
+    private function combineAttributes($mainAttributes, $moreAttributes = array())
     {
-        $attributes = [];
+        $attributes = array();
 
         // attributes created in the class are first and can be overwritten
         if (is_array($mainAttributes)) {
@@ -228,7 +227,14 @@ class FormHelper
         if ($this->checkAddIdAttributeFromName($attributes)) {
             // add id attribute based on name
             // ex: <input type="text" name="last_name" id="last_name">
-            $attributes['id'] = $attributes['name'];
+            $id = $attributes['name'];
+            // handle array variable names, ex "abc[1]" becomes "abc-1" 
+            // replace brackets with dashes
+            $id = str_replace(array('[', ']'), '-', $id);
+            // convert multiple consecutive dashes to single dash
+            $id = preg_replace('/\-+/', '-', $id);
+            $id = trim($id, '-');
+            $attributes['id'] = $id;
         }
 
         return $attributes;
@@ -251,6 +257,8 @@ class FormHelper
      * get variables passed by post or get (form or url) 
      * checks that the variable exists, so it will not
      *      produce a PHP warning
+     * note that $_POST takes precedence over $GET so if
+     *      both are passed $_POST will be returned
      */
     public function getPassed($var, $returnOnfail = '')
     {
@@ -296,7 +304,7 @@ class FormHelper
      */
     public function formStart($action = '', $method = '', $moreAttributes = array())
     {
-        $attributes = [];
+        $attributes = array();
 
         if (empty($action)) {
             // default action to the current script
@@ -331,13 +339,13 @@ class FormHelper
     /**
      * input elements <input type="text">, <input type="checkbox">, etc
      */
-    private function input($type, $name, $value = '', $moreAttributes = [])
+    private function input($type, $name, $value = '', $moreAttributes = array())
     {
-        $attributes = [
+        $attributes = array(
             'type' => $type,
             'name' => $name,
             'value' => $value
-        ];
+        );
 
         $attributes = $this->combineAttributes($attributes, $moreAttributes);
 
@@ -354,7 +362,7 @@ class FormHelper
     /**
      * <input type="hidden">
      */
-    public function hidden($name, $value = '', $moreAttributes = [])
+    public function hidden($name, $value = '', $moreAttributes = array())
     {
         return $this->input('hidden', $name, $value, $moreAttributes);
     }
@@ -362,7 +370,7 @@ class FormHelper
     /**
      * <input type="text">
      */
-    public function text($name, $value = '', $moreAttributes = [])
+    public function text($name, $value = '', $moreAttributes = array())
     {
         return $this->input('text', $name, $value, $moreAttributes);
     }
@@ -402,7 +410,7 @@ class FormHelper
     /**
      * <input type="color">
      */
-    public function color($name, $value = '', $moreAttributes = [])
+    public function color($name, $value = '', $moreAttributes = array())
     {
         $value = $this->returnValidHex($value);
         return $this->input('color', $name, $value, $moreAttributes);
@@ -411,7 +419,7 @@ class FormHelper
     /**
      * <input type="number">
      */
-    public function number($name, $value = '', $moreAttributes = [])
+    public function number($name, $value = '', $moreAttributes = array())
     {
         if (is_string($value)) {
             if (strlen($value) > 0 && is_numeric($value)) {
@@ -430,7 +438,7 @@ class FormHelper
     /**
      * <input type="range">
      */
-    public function range($name, $min, $max, $value = '', $moreAttributes = [])
+    public function range($name, $min, $max, $value = '', $moreAttributes = array())
     {
         $moreAttributes['min'] = intval($min);
         $moreAttributes['max'] = intval($max);
@@ -451,7 +459,7 @@ class FormHelper
     /**
      * <input type="email">
      */
-    public function email($name, $value = '', $moreAttributes = [])
+    public function email($name, $value = '', $moreAttributes = array())
     {
         return $this->input('email', $name, $value, $moreAttributes);
     }
@@ -459,7 +467,7 @@ class FormHelper
     /**
      * <input type="tel">
      */
-    public function tel($name, $value = '', $moreAttributes = [])
+    public function tel($name, $value = '', $moreAttributes = array())
     {
         return $this->input('tel', $name, $value, $moreAttributes);
     }
@@ -470,7 +478,7 @@ class FormHelper
      *      strtotime() function. ex: "2020-01-15", "2020/01/15", 
      *      "2020/01/15 12:30PM", "January 15, 2020", "now", "next Thursday", etc
      */
-    public function date($name, $value = '', $moreAttributes = [])
+    public function date($name, $value = '', $moreAttributes = array())
     {
         if (empty($value)) {
             $value = '';
@@ -478,7 +486,7 @@ class FormHelper
             // convert date to "Y-m-d" format
             // 
             $unitTime = strtotime($value);
-            if (empty($unitTime)) {
+            if ($unitTime === false) {
                 $value = '';
             } else {
                 $value = date('Y-m-d', $unitTime);
@@ -491,7 +499,7 @@ class FormHelper
      * <input type="password">
      * unlike other functions, password has no $value
      */
-    public function password($name, $moreAttributes = [])
+    public function password($name, $moreAttributes = array())
     {
         return $this->input('password', $name, '', $moreAttributes);
     }
@@ -500,7 +508,7 @@ class FormHelper
      * <input type="checkbox">
      * * unlike other functions, has $isChecked parameter before $value
      */
-    public function checkbox($name, $isChecked = false, $value = 1, $moreAttributes = [])
+    public function checkbox($name, $isChecked = false, $value = 1, $moreAttributes = array())
     {
         if (!empty($isChecked)) {
             if ($this->isXhtml) {
@@ -509,8 +517,6 @@ class FormHelper
                 $moreAttributes[] = 'checked';
             }
         }
-
-        $moreAttributes = $this->combineAttributes($moreAttributes);
 
         $html = $this->input('checkbox', $name, $value, $moreAttributes);
         return $this->htmlOutputOrReturn($html);
@@ -522,7 +528,7 @@ class FormHelper
      *      way, when radio buttons are added in a loop, this function takes care of
      *      the evalutions
      */
-    public function radio($name, $value, $selectedValue = '', $moreAttributes = [])
+    public function radio($name, $value, $selectedValue = '', $moreAttributes = array())
     {
         if (!empty($value) && !empty($selectedValue) && $value == $selectedValue) {
             if ($this->isXhtml) {
@@ -532,8 +538,6 @@ class FormHelper
             }
         }
 
-        $moreAttributes = $this->combineAttributes($moreAttributes);
-
         $html = $this->input('radio', $name, $value, $moreAttributes);
         return $this->htmlOutputOrReturn($html);
     }
@@ -542,7 +546,7 @@ class FormHelper
      * <input type="submit">
      * * unlike other functions, the $value parameter is after $name
      */
-    public function submit($value = '', $name = '',  $moreAttributes = [])
+    public function submit($value = '', $name = '',  $moreAttributes = array())
     {
         // set default name, button input data is rarely processed, so
         //      the name can often use the default value
@@ -563,7 +567,7 @@ class FormHelper
      * <input type="reset">
      * * unlike other functions, the $value parameter is after $name
      */
-    public function reset($value = '', $name = '',  $moreAttributes = [])
+    public function reset($value = '', $name = '',  $moreAttributes = array())
     {
         // set default name, button input data is rarely processed, so
         //      the name can often use the default value
@@ -583,11 +587,9 @@ class FormHelper
     /**
      * <textarea>
      */
-    public function textarea($name, $value = '', $moreAttributes = [])
+    public function textarea($name, $value = '', $moreAttributes = array())
     {
-        $attributes = [
-            'name' => $name
-        ];
+        $attributes = array('name' => $name);
 
         $attributes = $this->combineAttributes($attributes, $moreAttributes);
 
@@ -601,7 +603,7 @@ class FormHelper
     /**
      *<button>
      */
-    public function button($html = 'Submit', $moreAttributes = [])
+    public function button($html = 'Submit', $moreAttributes = array())
     {
         // note that html is not escaped. this will allow images
         $html = '<button' . $this->attributeArrayToString($moreAttributes) . '>' .
@@ -617,11 +619,9 @@ class FormHelper
      */
     private function selectOption($display, $value, $selectedValue)
     {
-        $attributes = [
-            'value' => $value
-        ];
+        $attributes = array('value' => $value);
 
-        if (!empty($value) && !empty($selectedValue) && $value == $selectedValue) {
+        if ($value !== null && $selectedValue !== null && $value == $selectedValue) {
             if ($this->isXhtml) {
                 $attributes['selected'] = 'selected';
             } else {
@@ -643,16 +643,16 @@ class FormHelper
      * $options is an array of key/value pairs that will become the html options
      * $options accepts 2 dimensional arrays. the key of the inner array will
      *      be the label of an optgroup
-     * $options = ['austin'=>'Austin', 'dallas'=>'Dallas', 'seattle'=>'Seattle'];
-     * $options = [
+     * $options = array('austin'=>'Austin', 'dallas'=>'Dallas', 'seattle'=>'Seattle');
+     * $options = array(
      *      'Texas'=>['austin'=>'Austin', 'dallas'=>'Dallas'],
-     *      'Washington'=>['seattle'=>'Seattle']];
+     *      'Washington'=>['seattle'=>'Seattle']);
      */
-    public function select($name, $options, $value = null, $moreAttributes = [])
+    public function select($name, $options, $value = null, $moreAttributes = array())
     {
-        $attributes = [
-            'name' => $name
-        ];
+        $attributes = array('name' => $name);
+
+        $attributes = $this->combineAttributes($attributes, $moreAttributes);
 
         $html = '<select' . $this->attributeArrayToString($attributes) . '>';
 
@@ -662,6 +662,9 @@ class FormHelper
                     $this->attributeArrayToString(['label' => $optionValue]) .
                     '>';
                 foreach ($display as $groupOptionValue => $groupOptionDisplay) {
+                    if ($this->doSelectOptionValueEqualsText) {
+                        $groupOptionValue = $groupOptionDisplay;
+                    }
                     $html .= $this->selectOption(
                         $groupOptionDisplay,
                         $groupOptionValue,
@@ -684,18 +687,18 @@ class FormHelper
 
     /**
      * <select>
-     * $records is a 2 dimensional array, such as resuls from a database query
+     * $records is a 2 dimensional array, such as results from a database query
      * example [ ['id'=>123, 'name'=>'Bob Jones', 'email'=>'bob@test.com'],
      *      ['id'=>356, 'name'=>'Jim Smith', 'email'=>'jim@test.com']]
      * $valueKey and $displayKey are the keys in each record for the value and
      *      display text for each html option
-     * $valueKey='id', $displayKey='name' will ouput 
+     * $valueKey='id', $displayKey='name' will output 
      *      <option value="123">Bob Jones</option><option value="356">Jim Smith</option>
      * $emptyText is the optional first empty option in the dropdown menu. used to
      *      keep the first option from being selected when the form is loaded and/or to
      *      allow a field to be skipped.
-     * $emptyText = 'Select An Item' will make the first option 
-     *      <option value="Select An Item"></option>
+     * $emptyText = 'Select An Item' will add a new first option 
+     *      <option value="">Select An Item</option>
      * if $emptyText is empty, no additional option will be added
      */
     public function selectByRecordSet(
@@ -705,9 +708,9 @@ class FormHelper
         $displayKey,
         $emptyText = '',
         $value = null,
-        $moreAttributes = []
+        $moreAttributes = array()
     ) {
-        $options = [];
+        $options = array();
 
         if (!empty($emptyText)) {
             $options[''] = $emptyText;
