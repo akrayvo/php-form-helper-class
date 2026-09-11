@@ -121,38 +121,38 @@ class FormHelper
             return '';
         }
 
-        $booleanAttributes = [];
-
+        $addedAttributes = [];
         $attributeString = '';
+
         foreach ($attributes as $name => $value) {
-            $attributeString .= $this->attributeToString($name, $value);
+            if (is_null($value)) {
+                continue;
+            }
+
+            $value = $this->htmlEscape($value);
+
+            if (is_int($name)) {
+                // numeric keys are treated as non associate array.
+                // so attributes with no value, will be set this way (readonly, disabled) 
+                
+                if (!in_array($value, $addedAttributes)) {
+                    $addedAttributes[] = $value;
+                    if ($this->isXhtml) {
+                        $attributeString .= ' ' . $value. '="'.$value.'"';
+                    } else {
+                        $attributeString .= ' ' . $value;
+                    }
+                }
+            } else {
+                $name = $this->htmlEscape($name);
+                if (!in_array($name, $addedAttributes)) {
+                    $addedAttributes[] = $name;
+                    $attributeString .= ' ' . $name . '="' . $value . '"';
+                }
+            }
         }
 
         return $attributeString;
-    }
-
-    private function attributeToString($name, $value)
-    {
-        if (is_null($value)) {
-            return '';
-        }
-
-        if (is_int($name)) {
-            // numeric keys are treated as non associatve array.
-            // so attriubes with no value, will be set this way (readonly, disabled) 
-            $booleanAttribute = $this->htmlEscape($value);
-            $booleanAttributes = [];
-            if (!in_array($booleanAttribute, $booleanAttributes)) {
-                $booleanAttributes[] = $booleanAttribute;
-                if ($this->isXhtml) {
-                    return ' ' . $booleanAttribute. '="'.$booleanAttribute.'"';
-                }
-                
-                return ' ' . $booleanAttribute;
-            }
-        }
-        return ' ' . $this->htmlEscape($name) . '="' . $this->htmlEscape($value) . '"';
-
     }
 
     /**
@@ -228,6 +228,7 @@ class FormHelper
             // add id attribute based on name
             // ex: <input type="text" name="last_name" id="last_name">
             $id = $attributes['name'];
+            // handle array variable names, ex "abc[1]" becomes "abc-1" 
             // replace brackets with dashes
             $id = str_replace(array('[', ']'), '-', $id);
             // convert multiple consecutive dashes to single dash
