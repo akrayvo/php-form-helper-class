@@ -6,47 +6,65 @@
 
 class FormHelper
 {
-    /**
-     * automatically add an "id" attribute with the same value as "name"
+/**
+     * automatically add an "id" attribute with the same value as "name"?
+     * 
      * does not affect radio inputs because they can have 
-     *      multiple elements with the same name
-     * if set to false, id's can be by added with the $moreAttributes parameter
-     * if set to true, id's can be by overridden with the $moreAttributes parameter
+     * multiple elements with the same "name" attribute
+     * 
+     * if false, id's can be added with the $moreAttributes parameter
+     * 
+     * if true, id's can be overridden with the $moreAttributes parameter
      */
     private $doAddIdAttributeFromName = false;
 
     /**
-     * return the html elements as a string
-     * if not set, output is written to the screen
+     * return the html elements as a string?
+     * 
+     * if true, html is returned
+     * echo $form->text('name', $name);
+     * $html = $form->text('name', $name); echo $html;
+     * 
+     * if false, html is directly output
+     * $form->text('name', $name);
      */
     private $doReturnHtml = false;
 
     /**
-     * close tag elements, ex: <input type="input" name="name" />
-     *      vs <input type="input" name="name">
-     * boolean attributes will have values, ex:
-     *      <option value="1" selected="selected"> vs.
-     *      <option value="1" selected>
+     * output html as XHTML-style syntax?
+     * 
+     * close tag elements
+     * if true  <input type="input" name="name" />
+     * if false <input type="input" name="name">
+     * 
+     * boolean attributes (selected, readonly, etc) will have values
+     * if true  <option value="1" selected="selected"> vs.
+     * if false <option value="1" selected>
      */
     private $isXhtml = false;
 
     /**
-     * string cleanup of passed variables
-     * removes HTML tags (strip_tags)
-     * strips whitespace from the beginning and end of a string (trim)
+     * clean up of passed variables?
+     * 
+     * if true, removes HTML tags (php strip_tags)
+     * 
+     * if true, strips whitespace from the beginning and end of a string (php trim)
+     * 
+     * if false, passed variables are unchanged
+     * 
      * used in getPost(), getGet(), and getPassed() functions
      */
     private $doPassedStringCleanup = true;
 
     /**
-     * when an array of data is passed for the options of a dropdown menu (select),
-     *      this determines if the value for each option is the array item key or 
-     *      the array item value (same as the display)
-     * if this is set, select option value and display text will both be set 
-     *      to the options array item value. so [2=>'a', => 3=>'b'] will output
+     * make the value equal to the display text for options in dropdown menus (html select)?
+     * 
+     * if true, html select option value and display text will both be set 
+     *      to the passed options array item value. so array(2=>"a", 3=>"b") outputs
      *      <option value="a">a</option><option value="b">b</option>
-     * if not set, select option value will be the array key and the display 
-     *      text will be the array value. so [2=>'a', => 3=>'b'] will output
+     * 
+     * if false, html select option value will be the array item key and the 
+     *      html display text will be the array item value. so array(2=>"a", 3=>"b") outputs
      *      <option value="2">a</option><option value="3">b</option>
      */
     private $doSelectOptionValueEqualsText = false;
