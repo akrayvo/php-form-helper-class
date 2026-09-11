@@ -58,9 +58,8 @@ class FormHelper
     {
         if ($value) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     public function setDoAddIdAttributeFromName($value)
