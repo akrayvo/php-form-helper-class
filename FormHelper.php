@@ -227,7 +227,13 @@ class FormHelper
         if ($this->checkAddIdAttributeFromName($attributes)) {
             // add id attribute based on name
             // ex: <input type="text" name="last_name" id="last_name">
-            $attributes['id'] = $attributes['name'];
+            $id = $attributes['name'];
+            // replace brackets with dashes
+            $id = str_replace(array('[', ']'), '-', $id);
+            // convert multiple consecutive dashes to single dash
+            $id = preg_replace('/\-+/', '-', $id);
+            $id = trim($id, '-');
+            $attributes['id'] = $id;
         }
 
         return $attributes;
@@ -250,6 +256,8 @@ class FormHelper
      * get variables passed by post or get (form or url) 
      * checks that the variable exists, so it will not
      *      produce a PHP warning
+     * note that $_POST takes precedence over $GET so if
+     *      both are passed $_POST will be returned
      */
     public function getPassed($var, $returnOnfail = '')
     {
