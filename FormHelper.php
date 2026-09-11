@@ -510,8 +510,6 @@ class FormHelper
             }
         }
 
-        $moreAttributes = $this->combineAttributes($moreAttributes);
-
         $html = $this->input('checkbox', $name, $value, $moreAttributes);
         return $this->htmlOutputOrReturn($html);
     }
@@ -531,8 +529,6 @@ class FormHelper
                 $moreAttributes[] = 'checked';
             }
         }
-
-        $moreAttributes = $this->combineAttributes($moreAttributes);
 
         $html = $this->input('radio', $name, $value, $moreAttributes);
         return $this->htmlOutputOrReturn($html);
