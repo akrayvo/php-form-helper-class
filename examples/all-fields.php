@@ -1,7 +1,7 @@
 <?php
 
 require_once('../FormHelper.php');
-$form = new FormDisplay();
+$form = new FormHelper();
 
 $form->setDoPassedStringCleanup(false);
 

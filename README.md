@@ -18,7 +18,7 @@ HTML / PHP code
 
 // include the class file and create a new object.
 require_once('../FormHelper.php');
-$form = new FormDisplay();
+$form = new FormHelper();
 
 // get the value passed to the page. check both $_POST and $_GET
 $name = $form->getPassed('name');

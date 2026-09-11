@@ -22,7 +22,7 @@ require_once('../FormHelper.php');
     <?php 
 
     // initialzie class
-    $form = new FormDisplay();
+    $form = new FormHelper();
     // automatically add the id field
     $form->setDoAddIdAttributeFromName(true);
     // for dropdown (select) inputs, the value is the same as the text displayed
