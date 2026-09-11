@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Class FormHelper - static class to display from elements in HTML
+ * Class FormHelper - class to display form elements in HTML
  */
 
 class FormHelper
@@ -34,7 +34,7 @@ class FormHelper
     {
         $this->doAddIdAttributeFromName = $this->returnBoolean($value);
     }
-    
+
     /**
      * return the html elements as a string?
      * 
@@ -51,13 +51,13 @@ class FormHelper
     {
         $this->doReturnHtml = $this->returnBoolean($value);
     }
-    
+
     /**
      * output html as XHTML-style syntax?
      * 
      * self-closing elements
-     * if true  <input type="input" name="name" />
-     * if false <input type="input" name="name">
+     * if true  <input type="text" name="name" />
+     * if false <input type="text" name="name">
      * 
      * boolean attributes (selected, readonly, etc) will have values that match the attribute
      * if true  <option value="1" selected="selected"> vs.
@@ -69,24 +69,22 @@ class FormHelper
     {
         $this->isXhtml = $this->returnBoolean($value);
     }
-    
+
     /**
      * clean up passed values?
      * 
-     * if true, removes HTML tags (php strip_tags)
-     * 
-     * if true, strips whitespace from the beginning and end of a string (php trim)
+     * if true, removes HTML tags (strip_tags) and trims whitespace (php trim)
      * 
      * if false, passed variables are unchanged
      * 
      * used in getPost(), getGet(), and getPassed() functions
      * 
-     * * default = true
+     * default = true
      */
     public function setDoPassedStringCleanup($value)
     {
         $this->doPassedStringCleanup = $this->returnBoolean($value);
-    }    
+    }
 
     /**
      * make the value equal to the display text for options in dropdown menus (html select)?
@@ -107,13 +105,492 @@ class FormHelper
     }
     
 
+    // -----------------------------------------------------------------------------
+    // Form Container
+    // -----------------------------------------------------------------------------
+
+    /**
+     * start form <form>
+     */
+    public function formStart($action = '', $method = '', $moreAttributes = array())
+    {
+        $attributes = array();
+
+        if (empty($action)) {
+            // default action to the current script
+            $action = $_SERVER['SCRIPT_NAME'];
+        }
+        $attributes['action'] = $action;
+
+        // if the method is "get" or "g" then set the method to get. otherwise default to post.
+        if (strtolower($method) === 'get' || strtolower($method) === 'g') {
+            $method = 'get';
+        } else {
+            $method = 'post';
+        }
+        $attributes['method'] = $method;
+
+        $attributes = $this->combineAttributes($attributes, $moreAttributes);
+
+        $html = '<form' . $this->attributeArrayToString($attributes) . '>';
+
+        return $this->htmlOutputOrReturn($html);
+    }
+
+    /**
+     * end form </form>
+     * 
+     * Provided for consistency with formStart(), so the form can be
+     * opened and closed using FormHelper methods.
+     */
+    public function formEnd()
+    {
+        $html = '</form>';
+        return $this->htmlOutputOrReturn($html);
+    }
+
+    // -----------------------------------------------------------------------------
+    // Generic Form Input
+    // -----------------------------------------------------------------------------
+
+    /**
+     * input elements <input type="text">, <input type="checkbox">, etc
+     * 
+     * used by the specific input functions such as text(), hidden(), checkbox(), etc.
+     *
+     * can also be used directly for input types that do not have a
+     * specific function in FormHelper. ex: $form->input('url', 'homepage', $homepage);
+     * 
+     */
+    public function input($type, $name, $value = '', $moreAttributes = array())
+    {
+        $attributes = array(
+            'type' => $type,
+            'name' => $name,
+            'value' => $value
+        );
+
+        $attributes = $this->combineAttributes($attributes, $moreAttributes);
+
+        $closingSlash = '';
+        if (!empty($this->isXhtml)) {
+            $closingSlash = ' /';
+        }
+
+        $html = '<input' . $this->attributeArrayToString($attributes) . $closingSlash . '>';
+
+        return $this->htmlOutputOrReturn($html);
+    }
 
 
+    // -----------------------------------------------------------------------------
+    // Inputs With Specific Types
+    // -----------------------------------------------------------------------------
+
+    /**
+     * <input type="text">
+     */
+    public function text($name, $value = '', $moreAttributes = array())
+    {
+        return $this->input('text', $name, $value, $moreAttributes);
+    }
+
+    /**
+     * <input type="password">
+     * 
+     * unlike other functions, password has no $value parameter, for security
+     * reasons, this class does not set a value for password input types. this
+     * can be worked around by directly calling the input function
+     */
+    public function password($name, $moreAttributes = array())
+    {
+        return $this->input('password', $name, '', $moreAttributes);
+    }
+
+    /**
+     * <input type="email">
+     */
+    public function email($name, $value = '', $moreAttributes = array())
+    {
+        return $this->input('email', $name, $value, $moreAttributes);
+    }
+
+    /**
+     * <input type="tel">
+     */
+    public function tel($name, $value = '', $moreAttributes = array())
+    {
+        return $this->input('tel', $name, $value, $moreAttributes);
+    }
+
+    /**
+     * <input type="date">
+     * $value can accept a date in any format that is accepted by PHP's 
+     * strtotime() function. ex: "2020-01-15", "2020/01/15", 
+     * "2020/01/15 12:30PM", "January 15, 2020", "now", "next Thursday", etc
+     */
+    public function date($name, $value = '', $moreAttributes = array())
+    {
+        if (empty($value)) {
+            $value = '';
+        } else {
+            // convert date to "Y-m-d" format
+            // 
+            $unitTime = strtotime($value);
+            if ($unitTime === false) {
+                $value = '';
+            } else {
+                $value = date('Y-m-d', $unitTime);
+            }
+        }
+        return $this->input('date', $name, $value, $moreAttributes);
+    }
+
+    /**
+     * <input type="color">
+     */
+    public function color($name, $value = '', $moreAttributes = array())
+    {
+        $value = $this->returnValidHex($value);
+        return $this->input('color', $name, $value, $moreAttributes);
+    }
+
+    /**
+     * <input type="number">
+     */
+    public function number($name, $value = '', $moreAttributes = array())
+    {
+        if (is_string($value)) {
+            if (strlen($value) > 0 && is_numeric($value)) {
+                // convert valid number string to float
+                $value = floatval($value);
+            } else {
+                // the string is empty or is not a number. set null
+                $value = null;
+            }
+        }
+
+        return $this->input('number', $name, $value, $moreAttributes);
+    }
+
+    /**
+     * <input type="range">
+     */
+    public function range($name, $min, $max, $value = '', $moreAttributes = array())
+    {
+        $moreAttributes['min'] = intval($min);
+        $moreAttributes['max'] = intval($max);
+
+        if (is_string($value)) {
+            if (strlen($value) > 0 && is_numeric($value)) {
+                // convert valid number string to float
+                $value = floatval($value);
+            } else {
+                // the string is empty or is not a number. set null
+                $value = null;
+            }
+        }
+
+        return $this->input('range', $name, $value, $moreAttributes);
+    }
+
+    /**
+     * <input type="checkbox">
+     * 
+     * unlike other functions, has the $isChecked parameter before $value. this is because
+     * the value is often not important when processing checkboxes. when each checkbox has a 
+     * different name, checking whether the name is present in $_POST is enough to determine
+     * which checkboxes were selected, so the default value can generally be used.
+     */
+    public function checkbox($name, $isChecked = false, $value = 1, $moreAttributes = array())
+    {
+        if (!empty($isChecked)) {
+            if ($this->isXhtml) {
+                $moreAttributes['checked'] = 'checked';
+            } else {
+                $moreAttributes[] = 'checked';
+            }
+        }
+
+        $html = $this->input('checkbox', $name, $value, $moreAttributes);
+        return $this->htmlOutputOrReturn($html);
+    }
+
+    /**
+     * <input type="radio">
+     * 
+     * if $value is equal to $selectedValue, the radio button will be selected.
+     * this is useful when adding radio buttons in a loop because this function
+     * takes care of the comparison.
+     */
+    public function radio($name, $value, $selectedValue = null, $moreAttributes = array())
+    {
+        if ($value !== null && $selectedValue !== null) {
+            if ($this->isXhtml) {
+                $moreAttributes['checked'] = 'checked';
+            } else {
+                $moreAttributes[] = 'checked';
+            }
+        }
+
+        $html = $this->input('radio', $name, $value, $moreAttributes);
+        return $this->htmlOutputOrReturn($html);
+    }
+
+    /**
+     * <input type="hidden">
+     */
+    public function hidden($name, $value = '', $moreAttributes = array())
+    {
+        return $this->input('hidden', $name, $value, $moreAttributes);
+    }
+
+
+    // -----------------------------------------------------------------------------
+    // Other Form Elements (non input) (textarea and select)
+    // -----------------------------------------------------------------------------
+
+    /**
+     * <textarea>
+     */
+    public function textarea($name, $value = '', $moreAttributes = array())
+    {
+        $attributes = array('name' => $name);
+
+        $attributes = $this->combineAttributes($attributes, $moreAttributes);
+
+        $html = '<textarea' . $this->attributeArrayToString($attributes) . '>' .
+            $this->htmlEscape($value) .
+            '</textarea>';
+
+        return $this->htmlOutputOrReturn($html);
+    }
+
+    /**
+     * <select>
+     * 
+     * $options is an array of key/value pairs that will become the html options
+     * 
+     * $options accepts 2 dimensional arrays. the key of the outer array will
+     *      be the label of an optgroup
+     * 
+     * $options = array('austin'=>'Austin', 'dallas'=>'Dallas', 'seattle'=>'Seattle');
+     * 
+     * $options = array(
+     *      'Texas'=>array('austin'=>'Austin', 'dallas'=>'Dallas'),
+     *      'Washington'=>array('seattle'=>'Seattle')
+     * );
+     */
+    public function select($name, $options, $value = null, $moreAttributes = array())
+    {
+        $attributes = array('name' => $name);
+
+        $attributes = $this->combineAttributes($attributes, $moreAttributes);
+
+        $html = '<select' . $this->attributeArrayToString($attributes) . '>';
+
+        foreach ($options as $optionValue => $display) {
+            if (is_array($display)) {
+                $html .= '<optgroup ' .
+                    $this->attributeArrayToString(array('label' => $optionValue)) .
+                    '>';
+                foreach ($display as $groupOptionValue => $groupOptionDisplay) {
+                    if ($this->doSelectOptionValueEqualsText) {
+                        $groupOptionValue = $groupOptionDisplay;
+                    }
+                    $html .= $this->selectOption(
+                        $groupOptionDisplay,
+                        $groupOptionValue,
+                        $value
+                    );
+                }
+                $html .= '</optgroup>';
+            } else {
+                if ($this->doSelectOptionValueEqualsText) {
+                    $optionValue = $display;
+                }
+                $html .= $this->selectOption($display, $optionValue, $value);
+            }
+        }
+
+        $html .= '</select>';
+
+        return $this->htmlOutputOrReturn($html);
+    }
+
+    /**
+     * <select>
+     * 
+     * $records is a 2 dimensional array, such as results from a database query
+     * 
+     * example usage:
+     * array(
+     *      array('id'=>123, 'name'=>'Bob Jones', 'email'=>'bob@test.com'),
+     *      array('id'=>356, 'name'=>'Jim Smith', 'email'=>'jim@test.com')
+     * )
+     * $valueKey and $displayKey are the array keys in each record for the value and
+     * display text for each html option so $valueKey='id', $displayKey='name' will output 
+     * <option value="123">Bob Jones</option><option value="356">Jim Smith</option>
+     * 
+     * $emptyText is the optional first empty option with an empty value in the dropdown
+     * menu. used to keep the first option from being selected when the form is loaded 
+     * and/or to allow a field to be skipped.
+     * $emptyText = 'Select An Item' will add a new first option 
+     * <option value="">Select An Item</option>
+     * 
+     * if $emptyText is empty, no additional option will be added
+     */
+    public function selectByRecordSet(
+        $name,
+        $records,
+        $valueKey,
+        $displayKey,
+        $emptyText = '',
+        $value = null,
+        $moreAttributes = array()
+    ) {
+        $options = array();
+
+        if (!empty($emptyText)) {
+            $options[''] = $emptyText;
+        }
+
+        foreach ($records as $record) {
+            if (isset($record[$valueKey]) && isset($record[$displayKey])) {
+                $options[$record[$valueKey]] = $record[$displayKey];
+            }
+        }
+
+        return $this->select($name, $options, $value, $moreAttributes);
+    }
+
+
+    // -----------------------------------------------------------------------------
+    // Form Buttons
+    // -----------------------------------------------------------------------------
+
+    /**
+     * <input type="submit">
+     * 
+     * unlike other functions, $value comes before $name because
+     * the button value is generally more important than its name.
+     */
+    public function submit($value = '', $name = '',  $moreAttributes = array())
+    {
+        // set default name, button input data is rarely processed, so
+        //      the name can often use the default value
+        if (empty($name)) {
+            $name = 'submitInputButton';
+        }
+
+        if (empty($value)) {
+            $value = 'Submit';
+        }
+
+        $moreAttributes = $this->combineAttributes($moreAttributes);
+
+        return $this->input('submit', $name, $value, $moreAttributes);
+    }
+
+    /**
+     * <input type="reset">
+     * 
+     * unlike other functions, the $value parameter is after $name
+     */
+    public function reset($value = '', $name = '',  $moreAttributes = array())
+    {
+        // set default name, button input data is rarely processed, so
+        //      the name can often use the default value
+        if (empty($name)) {
+            $name = 'submitInputReset';
+        }
+
+        if (empty($value)) {
+            $value = 'Reset';
+        }
+
+        $moreAttributes = $this->combineAttributes($moreAttributes);
+
+        return $this->input('reset', $name, $value, $moreAttributes);
+    }
+
+    /**
+     *<button>
+     */
+    public function button($html = 'Submit', $moreAttributes = array())
+    {
+        // note that html is not escaped. this will allow images
+        $html = '<button' . $this->attributeArrayToString($moreAttributes) . '>' .
+            $html .
+            '</button>';
+
+        return $this->htmlOutputOrReturn($html);
+    }
+
+
+    // -----------------------------------------------------------------------------
+    // Request Passed Values (used in redisplaying a form with errors or form processing)
+    // -----------------------------------------------------------------------------
+
+    /**
+     * get variables passed by post or get (form or url)
+     * 
+     * checks that the variable exists, so it will not produce a PHP warning
+     * 
+     * note that $_POST takes precedence over $GET, so if both are passed $_POST will be returned
+     */
+    public function getPassed($var, $returnOnfail = '')
+    {
+        if (isset($_POST[$var])) {
+            return $this->getPost($var, $returnOnfail);
+        } elseif (isset($_GET[$var])) {
+            return $this->getGet($var, $returnOnfail);
+        }
+
+        return $returnOnfail;
+    }
+
+    /**
+     * get variables passed by post (form) 
+     */
+    public function getPost($var, $returnOnfail = '')
+    {
+        if (isset($_POST[$var])) {
+            return $this->stringCleanup($_POST[$var]);
+        }
+
+        return $returnOnfail;
+    }
+
+    /**
+     * get variables passed by get (url parameters) 
+     */
+    public function getGet($var, $returnOnfail = '')
+    {
+        if (isset($_GET[$var])) {
+            return $this->stringCleanup($_GET[$var]);
+        }
+
+        return $returnOnfail;
+    }
+
+
+    // -----------------------------------------------------------------------------
+    // Public Helper Functions
+    // -----------------------------------------------------------------------------
+
+    /**
+     * escape string to display in HTML
+     */
+    public function htmlEscape($string)
+    {
+        return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
+    }
 
     /**
      * converts value to boolean
      */
-    private function returnBoolean($value)
+    public function returnBoolean($value)
     {
         if ($value) {
             return true;
@@ -121,7 +598,55 @@ class FormHelper
         return false;
     }
 
+    /**
+     * remove html tags from string. "<b>hello</b>" becomes "hello"
+     * trim string ex: " hello " becomes "hello"
+     */
+    public function stringCleanup($string)
+    {
+        if (!$this->doPassedStringCleanup || !is_string($string)) {
+            return $string;
+        }
+        $string = trim(strip_tags($string));
+        return $string;
+    }
 
+    /**
+     * validate hex, 3 or 6 digit, with or without #
+     * used in the "color" function
+     */
+    public function returnValidHex($hex)
+    {
+        if (empty($hex)) {
+            return '';
+        }
+
+        $hex = strtolower(trim($hex, '#'));
+
+        $length = strlen($hex);
+        if ($length != 3 && $length != 6) {
+            return '';
+        }
+
+        // only valid hex digits
+        if (!ctype_xdigit($hex)) {
+            return '';
+        }
+
+        if ($length == 3) {
+            // 3 digit, repeat each. ex 48B becomes 4488BB
+            $hex = str_repeat(substr($hex, 0, 1), 2) .
+                str_repeat(substr($hex, 1, 1), 2) .
+                str_repeat(substr($hex, 2, 1), 2);
+        }
+
+        return '#' . $hex;
+    }
+
+
+    // -----------------------------------------------------------------------------
+    // Private Helper Functions (not available outside of the class)
+    // -----------------------------------------------------------------------------
 
     /**
      * output or return the html based on the doReturnHtml setting
@@ -137,19 +662,11 @@ class FormHelper
     }
 
     /**
-     * escape string to display in HTML
-     */
-    public function htmlEscape($string)
-    {
-        return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
-    }
-
-    /**
      * converts an array of tag attributes to a string
-     * numeric keys will be treated as boolen values, so attributes
-     *      such as "readonly" and "checked" can be added.
-     * ex: ['id'=>'name', 'placeholder'=>'Name', 'readonly'] will ouput
-     *      'id="name" placeholder="Name" readonly'
+     * 
+     * items with numeric keys will be treated as boolean attributes, so attributes such as "readonly" and "checked" can be added.
+     * 
+     * ex: array('id'=>'name', 'placeholder'=>'Name', 'readonly') will output 'id="name" placeholder="Name" readonly'
      */
     private function attributeArrayToString($attributes)
     {
@@ -170,11 +687,11 @@ class FormHelper
             if (is_int($name)) {
                 // numeric keys are treated as a non-associative array.
                 // so attributes without a value can be specified this way (readonly, disabled) 
-                
+
                 if (!in_array($value, $addedAttributes)) {
                     $addedAttributes[] = $value;
                     if ($this->isXhtml) {
-                        $attributeString .= ' ' . $value. '="'.$value.'"';
+                        $attributeString .= ' ' . $value . '="' . $value . '"';
                     } else {
                         $attributeString .= ' ' . $value;
                     }
@@ -219,7 +736,7 @@ class FormHelper
 
         if (!empty($attributes['type'])) {
             // do NOT automatically add id's to radios based on
-            //      name. mulitple radios usually have the same name.
+            //      name. multiple radios usually have the same name.
             if ($attributes['type'] === 'radio') {
                 return false;
             }
@@ -230,6 +747,7 @@ class FormHelper
 
     /**
      * combines the attributes created in this class with ones passed as parameters
+     * 
      * adds the id attribute if needed
      */
     private function combineAttributes($mainAttributes, $moreAttributes = array())
@@ -277,379 +795,6 @@ class FormHelper
     }
 
     /**
-     * remove html tags from string. "<b>hello</b>" becomes "hello"
-     * trim string ex: " hello " becomes "hello"
-     */
-    public function stringCleanup($string)
-    {
-        if (!$this->doPassedStringCleanup || !is_string($string)) {
-            return $string;
-        }
-        $string = trim(strip_tags($string));
-        return $string;
-    }
-
-    /**
-     * get variables passed by post or get (form or url) 
-     * checks that the variable exists, so it will not
-     *      produce a PHP warning
-     * note that $_POST takes precedence over $GET so if
-     *      both are passed $_POST will be returned
-     */
-    public function getPassed($var, $returnOnfail = '')
-    {
-        if (isset($_POST[$var])) {
-            return $this->getPost($var, $returnOnfail);
-        } elseif (isset($_GET[$var])) {
-            return $this->getGet($var, $returnOnfail);
-        }
-
-        return $returnOnfail;
-    }
-
-    /**
-     * get variables passed by post (form) 
-     * checks that the variable exists, so it will not
-     *      produce a PHP warning
-     */
-    public function getPost($var, $returnOnfail = '')
-    {
-        if (isset($_POST[$var])) {
-            return $this->stringCleanup($_POST[$var]);
-        }
-
-        return $returnOnfail;
-    }
-
-    /**
-     * get variables passed by get (url) 
-     * checks that the variable exists, so it will not
-     *      produce a PHP warning
-     */
-    public function getGet($var, $returnOnfail = '')
-    {
-        if (isset($_GET[$var])) {
-            return $this->stringCleanup($_GET[$var]);
-        }
-
-        return $returnOnfail;
-    }
-
-    /**
-     * start form <form>
-     */
-    public function formStart($action = '', $method = '', $moreAttributes = array())
-    {
-        $attributes = array();
-
-        if (empty($action)) {
-            // default action to the current script
-            $action = $_SERVER['SCRIPT_NAME'];
-        }
-        $attributes['action'] = $action;
-
-        // if the method is "get" or "g" then set the method to get. otherwise default to post.
-        if (strtolower($method) === 'get') {
-            $method = 'get';
-        } else {
-            $method = 'post';
-        }
-        $attributes['method'] = $method;
-
-        $attributes = $this->combineAttributes($attributes, $moreAttributes);
-
-        $html = '<form' . $this->attributeArrayToString($attributes) . '>';
-
-        return $this->htmlOutputOrReturn($html);
-    }
-
-    /**
-     * end form </form>
-     */
-    public function formEnd()
-    {
-        $html = '</form>';
-        return $this->htmlOutputOrReturn($html);
-    }
-
-    /**
-     * input elements <input type="text">, <input type="checkbox">, etc
-     */
-    private function input($type, $name, $value = '', $moreAttributes = array())
-    {
-        $attributes = array(
-            'type' => $type,
-            'name' => $name,
-            'value' => $value
-        );
-
-        $attributes = $this->combineAttributes($attributes, $moreAttributes);
-
-        $closingSlash = '';
-        if (!empty($this->isXhtml)) {
-            $closingSlash = ' /';
-        }
-
-        $html = '<input' . $this->attributeArrayToString($attributes) . $closingSlash . '>';
-
-        return $this->htmlOutputOrReturn($html);
-    }
-
-    /**
-     * <input type="hidden">
-     */
-    public function hidden($name, $value = '', $moreAttributes = array())
-    {
-        return $this->input('hidden', $name, $value, $moreAttributes);
-    }
-
-    /**
-     * <input type="text">
-     */
-    public function text($name, $value = '', $moreAttributes = array())
-    {
-        return $this->input('text', $name, $value, $moreAttributes);
-    }
-
-    /**
-     * validate hex, 3 or 6 digit, with or without #
-     * used in the "color" function
-     */
-    private function returnValidHex($hex)
-    {
-        if (empty($hex)) {
-            return '';
-        }
-
-        $hex = strtolower(trim($hex, '#'));
-
-        $length = strlen($hex);
-        if ($length != 3 && $length != 6) {
-            return '';
-        }
-
-        // only valid hex digits
-        if (!ctype_xdigit($hex)) {
-            return '';
-        }
-
-        if ($length == 3) {
-            // 3 digit, repeat each. ex 48B becomes 4488BB
-            $hex = str_repeat(substr($hex, 0, 1), 2) .
-                str_repeat(substr($hex, 1, 1), 2) .
-                str_repeat(substr($hex, 2, 1), 2);
-        }
-
-        return '#' . $hex;
-    }
-
-    /**
-     * <input type="color">
-     */
-    public function color($name, $value = '', $moreAttributes = array())
-    {
-        $value = $this->returnValidHex($value);
-        return $this->input('color', $name, $value, $moreAttributes);
-    }
-
-    /**
-     * <input type="number">
-     */
-    public function number($name, $value = '', $moreAttributes = array())
-    {
-        if (is_string($value)) {
-            if (strlen($value) > 0 && is_numeric($value)) {
-                // convert valid number string to float
-                $value = floatval($value);
-            } else {
-                // the string is empty or is not a number. set null
-                $value = null;                   
-            }
-        }
-
-
-        return $this->input('number', $name, $value, $moreAttributes);
-    }
-
-    /**
-     * <input type="range">
-     */
-    public function range($name, $min, $max, $value = '', $moreAttributes = array())
-    {
-        $moreAttributes['min'] = intval($min);
-        $moreAttributes['max'] = intval($max);
-
-        if (is_string($value)) {
-            if (strlen($value) > 0 && is_numeric($value)) {
-                // convert valid number string to float
-                $value = floatval($value);
-            } else {
-                // the string is empty or is not a number. set null
-                $value = null;                   
-            }
-        }
-
-        return $this->input('range', $name, $value, $moreAttributes);
-    }
-
-    /**
-     * <input type="email">
-     */
-    public function email($name, $value = '', $moreAttributes = array())
-    {
-        return $this->input('email', $name, $value, $moreAttributes);
-    }
-
-    /**
-     * <input type="tel">
-     */
-    public function tel($name, $value = '', $moreAttributes = array())
-    {
-        return $this->input('tel', $name, $value, $moreAttributes);
-    }
-
-    /**
-     * <input type="date">
-     * $value can accept a date in any format that is accepted by PHP's 
-     *      strtotime() function. ex: "2020-01-15", "2020/01/15", 
-     *      "2020/01/15 12:30PM", "January 15, 2020", "now", "next Thursday", etc
-     */
-    public function date($name, $value = '', $moreAttributes = array())
-    {
-        if (empty($value)) {
-            $value = '';
-        } else {
-            // convert date to "Y-m-d" format
-            // 
-            $unitTime = strtotime($value);
-            if ($unitTime === false) {
-                $value = '';
-            } else {
-                $value = date('Y-m-d', $unitTime);
-            }
-        }
-        return $this->input('date', $name, $value, $moreAttributes);
-    }
-
-    /**
-     * <input type="password">
-     * unlike other functions, password has no $value
-     */
-    public function password($name, $moreAttributes = array())
-    {
-        return $this->input('password', $name, '', $moreAttributes);
-    }
-
-    /**
-     * <input type="checkbox">
-     * * unlike other functions, has $isChecked parameter before $value
-     */
-    public function checkbox($name, $isChecked = false, $value = 1, $moreAttributes = array())
-    {
-        if (!empty($isChecked)) {
-            if ($this->isXhtml) {
-                $moreAttributes['checked'] = 'checked';
-            } else {
-                $moreAttributes[] = 'checked';
-            }
-        }
-
-        $html = $this->input('checkbox', $name, $value, $moreAttributes);
-        return $this->htmlOutputOrReturn($html);
-    }
-
-    /**
-     * <input type="radio">
-     * if $value is equal to $selectedValue, the radio button will be selected. this
-     *      way, when radio buttons are added in a loop, this function takes care of
-     *      the evalutions
-     */
-    public function radio($name, $value, $selectedValue = '', $moreAttributes = array())
-    {
-        if (!empty($value) && !empty($selectedValue) && $value == $selectedValue) {
-            if ($this->isXhtml) {
-                $moreAttributes['checked'] = 'checked';
-            } else {
-                $moreAttributes[] = 'checked';
-            }
-        }
-
-        $html = $this->input('radio', $name, $value, $moreAttributes);
-        return $this->htmlOutputOrReturn($html);
-    }
-
-    /**
-     * <input type="submit">
-     * * unlike other functions, the $value parameter is after $name
-     */
-    public function submit($value = '', $name = '',  $moreAttributes = array())
-    {
-        // set default name, button input data is rarely processed, so
-        //      the name can often use the default value
-        if (empty($name)) {
-            $name = 'submitInputButton';
-        }
-
-        if (empty($value)) {
-            $value = 'Submit';
-        }
-
-        $moreAttributes = $this->combineAttributes($moreAttributes);
-
-        return $this->input('submit', $name, $value, $moreAttributes);
-    }
-
-    /**
-     * <input type="reset">
-     * * unlike other functions, the $value parameter is after $name
-     */
-    public function reset($value = '', $name = '',  $moreAttributes = array())
-    {
-        // set default name, button input data is rarely processed, so
-        //      the name can often use the default value
-        if (empty($name)) {
-            $name = 'submitInputReset';
-        }
-
-        if (empty($value)) {
-            $value = 'Reset';
-        }
-
-        $moreAttributes = $this->combineAttributes($moreAttributes);
-
-        return $this->input('reset', $name, $value, $moreAttributes);
-    }
-
-    /**
-     * <textarea>
-     */
-    public function textarea($name, $value = '', $moreAttributes = array())
-    {
-        $attributes = array('name' => $name);
-
-        $attributes = $this->combineAttributes($attributes, $moreAttributes);
-
-        $html = '<textarea' . $this->attributeArrayToString($attributes) . '>' .
-            $this->htmlEscape($value) .
-            '</textarea>';
-
-        return $this->htmlOutputOrReturn($html);
-    }
-
-    /**
-     *<button>
-     */
-    public function button($html = 'Submit', $moreAttributes = array())
-    {
-        // note that html is not escaped. this will allow images
-        $html = '<button' . $this->attributeArrayToString($moreAttributes) . '>' .
-            $html .
-            '</button>';
-
-        return $this->htmlOutputOrReturn($html);
-    }
-
-    /**
      * <option>
      * called in the select() function
      */
@@ -672,92 +817,5 @@ class FormHelper
             '</option>';
 
         return $html;
-    }
-
-    /**
-     * <select>
-     * $options is an array of key/value pairs that will become the html options
-     * $options accepts 2 dimensional arrays. the key of the inner array will
-     *      be the label of an optgroup
-     * $options = array('austin'=>'Austin', 'dallas'=>'Dallas', 'seattle'=>'Seattle');
-     * $options = array(
-     *      'Texas'=>['austin'=>'Austin', 'dallas'=>'Dallas'],
-     *      'Washington'=>['seattle'=>'Seattle']);
-     */
-    public function select($name, $options, $value = null, $moreAttributes = array())
-    {
-        $attributes = array('name' => $name);
-
-        $attributes = $this->combineAttributes($attributes, $moreAttributes);
-
-        $html = '<select' . $this->attributeArrayToString($attributes) . '>';
-
-        foreach ($options as $optionValue => $display) {
-            if (is_array($display)) {
-                $html .= '<optgroup ' .
-                    $this->attributeArrayToString(['label' => $optionValue]) .
-                    '>';
-                foreach ($display as $groupOptionValue => $groupOptionDisplay) {
-                    if ($this->doSelectOptionValueEqualsText) {
-                        $groupOptionValue = $groupOptionDisplay;
-                    }
-                    $html .= $this->selectOption(
-                        $groupOptionDisplay,
-                        $groupOptionValue,
-                        $value
-                    );
-                }
-                $html .= '</optgroup>';
-            } else {
-                if ($this->doSelectOptionValueEqualsText) {
-                    $optionValue = $display;
-                }
-                $html .= $this->selectOption($display, $optionValue, $value);
-            }
-        }
-
-        $html .= '</select>';
-
-        return $this->htmlOutputOrReturn($html);
-    }
-
-    /**
-     * <select>
-     * $records is a 2 dimensional array, such as results from a database query
-     * example [ ['id'=>123, 'name'=>'Bob Jones', 'email'=>'bob@test.com'],
-     *      ['id'=>356, 'name'=>'Jim Smith', 'email'=>'jim@test.com']]
-     * $valueKey and $displayKey are the keys in each record for the value and
-     *      display text for each html option
-     * $valueKey='id', $displayKey='name' will output 
-     *      <option value="123">Bob Jones</option><option value="356">Jim Smith</option>
-     * $emptyText is the optional first empty option in the dropdown menu. used to
-     *      keep the first option from being selected when the form is loaded and/or to
-     *      allow a field to be skipped.
-     * $emptyText = 'Select An Item' will add a new first option 
-     *      <option value="">Select An Item</option>
-     * if $emptyText is empty, no additional option will be added
-     */
-    public function selectByRecordSet(
-        $name,
-        $records,
-        $valueKey,
-        $displayKey,
-        $emptyText = '',
-        $value = null,
-        $moreAttributes = array()
-    ) {
-        $options = array();
-
-        if (!empty($emptyText)) {
-            $options[''] = $emptyText;
-        }
-
-        foreach ($records as $record) {
-            if (isset($record[$valueKey]) && isset($record[$displayKey])) {
-                $options[$record[$valueKey]] = $record[$displayKey];
-            }
-        }
-
-        return $this->select($name, $options, $value, $moreAttributes);
     }
 }
