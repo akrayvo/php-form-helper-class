@@ -106,7 +106,7 @@ class FormHelper
      */
     public function htmlEscape($string)
     {
-        return htmlspecialchars($string);
+        return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
     }
 
     /**
