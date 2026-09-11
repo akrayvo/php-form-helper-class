@@ -6,7 +6,19 @@
 
 class FormHelper
 {
-/**
+    // -----------------------------------------------------------------------------
+    // Configuration
+    // -----------------------------------------------------------------------------
+
+    // configuration variables; see setters for details    
+    private $doAddIdAttributeFromName = false;
+    private $doReturnHtml = false;
+    private $isXhtml = false;
+    private $doPassedStringCleanup = true;
+    private $doSelectOptionValueEqualsText = false;
+
+
+    /**
      * automatically add an "id" attribute with the same value as "name"?
      * 
      * does not affect radio inputs because they can have 
@@ -15,9 +27,14 @@ class FormHelper
      * if false, id's can be added with the $moreAttributes parameter
      * 
      * if true, id's can be overridden with the $moreAttributes parameter
+     * 
+     * default = false
      */
-    private $doAddIdAttributeFromName = false;
-
+    public function setDoAddIdAttributeFromName($value)
+    {
+        $this->doAddIdAttributeFromName = $this->returnBoolean($value);
+    }
+    
     /**
      * return the html elements as a string?
      * 
@@ -27,24 +44,34 @@ class FormHelper
      * 
      * if false, html is directly output
      * $form->text('name', $name);
+     * 
+     * * default = false
      */
-    private $doReturnHtml = false;
-
+    public function setDoReturnHtml($value)
+    {
+        $this->doReturnHtml = $this->returnBoolean($value);
+    }
+    
     /**
      * output html as XHTML-style syntax?
      * 
-     * close tag elements
+     * self-closing elements
      * if true  <input type="input" name="name" />
      * if false <input type="input" name="name">
      * 
-     * boolean attributes (selected, readonly, etc) will have values
+     * boolean attributes (selected, readonly, etc) will have values that match the attribute
      * if true  <option value="1" selected="selected"> vs.
      * if false <option value="1" selected>
+     * 
+     * * default = false
      */
-    private $isXhtml = false;
-
+    public function setIsXhtml($value)
+    {
+        $this->isXhtml = $this->returnBoolean($value);
+    }
+    
     /**
-     * clean up of passed variables?
+     * clean up passed values?
      * 
      * if true, removes HTML tags (php strip_tags)
      * 
@@ -53,8 +80,13 @@ class FormHelper
      * if false, passed variables are unchanged
      * 
      * used in getPost(), getGet(), and getPassed() functions
+     * 
+     * * default = true
      */
-    private $doPassedStringCleanup = true;
+    public function setDoPassedStringCleanup($value)
+    {
+        $this->doPassedStringCleanup = $this->returnBoolean($value);
+    }    
 
     /**
      * make the value equal to the display text for options in dropdown menus (html select)?
@@ -66,11 +98,20 @@ class FormHelper
      * if false, html select option value will be the array item key and the 
      *      html display text will be the array item value. so array(2=>"a", 3=>"b") outputs
      *      <option value="2">a</option><option value="3">b</option>
+     * 
+     * * default = false
      */
-    private $doSelectOptionValueEqualsText = false;
+    public function setDoSelectOptionValueEqualsText($value)
+    {
+        $this->doSelectOptionValueEqualsText = $this->returnBoolean($value);
+    }
+    
+
+
+
 
     /**
-     * converts passed value to boolean
+     * converts value to boolean
      */
     private function returnBoolean($value)
     {
@@ -80,30 +121,7 @@ class FormHelper
         return false;
     }
 
-    public function setDoAddIdAttributeFromName($value)
-    {
-        $this->doAddIdAttributeFromName = $this->returnBoolean($value);
-    }
 
-    public function setDoReturnHtml($value)
-    {
-        $this->doReturnHtml = $this->returnBoolean($value);
-    }
-
-    public function setIsXhtml($value)
-    {
-        $this->isXhtml = $this->returnBoolean($value);
-    }
-
-    public function setDoPassedStringCleanup($value)
-    {
-        $this->doPassedStringCleanup = $this->returnBoolean($value);
-    }
-
-    public function setDoSelectOptionValueEqualsText($value)
-    {
-        $this->doSelectOptionValueEqualsText = $this->returnBoolean($value);
-    }
 
     /**
      * output or return the html based on the doReturnHtml setting
