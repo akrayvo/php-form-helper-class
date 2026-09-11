@@ -621,7 +621,7 @@ class FormHelper
             'value' => $value
         ];
 
-        if (!empty($value) && !empty($selectedValue) && $value == $selectedValue) {
+        if ($value !== null && $selectedValue !== null && $value == $selectedValue) {
             if ($this->isXhtml) {
                 $attributes['selected'] = 'selected';
             } else {
