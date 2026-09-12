@@ -510,11 +510,15 @@ class FormHelper
     }
 
     /**
-     *<button>
+     * <button>
+     *
+     * note that an id attribute is not automatically added when $doAddIdAttributeFromName is true.
+     * this is because no $name parameter is passed to derive the id from.
+     * if an id attribute is needed, it must be passed in the $moreAttributes array
      */
     public function button($html = 'Submit', $moreAttributes = array())
     {
-        // note that html is not escaped. this will allow images or other html inside of the button
+        // note that $html is not escaped. this allows images or other HTML inside of the button
         $html = '<button' . $this->attributeArrayToString($moreAttributes) . '>' .
             $html .
             '</button>';
