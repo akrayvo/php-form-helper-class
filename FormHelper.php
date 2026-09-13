@@ -13,7 +13,7 @@ class FormHelper
     // configuration variables; see setters for details    
     private $doAddIdAttributeFromName = false;
     private $doReturnHtml = false;
-    private $isXhtml = false;
+    private $isXhtmlStyle = false;
     private $doPassedStringCleanup = true;
     private $doSelectOptionValueEqualsText = false;
 
@@ -65,9 +65,9 @@ class FormHelper
      * 
      * * default = false
      */
-    public function setIsXhtml($value)
+    public function setIsXhtmlStyle($value)
     {
-        $this->isXhtml = $this->returnBoolean($value);
+        $this->isXhtmlStyle = $this->returnBoolean($value);
     }
 
     /**
@@ -173,7 +173,7 @@ class FormHelper
         $attributes = $this->combineAttributes($attributes, $moreAttributes);
 
         $closingSlash = '';
-        if (!empty($this->isXhtml)) {
+        if (!empty($this->isXhtmlStyle)) {
             $closingSlash = ' /';
         }
 
@@ -305,7 +305,7 @@ class FormHelper
     public function checkbox($name, $isChecked = false, $value = 1, $moreAttributes = array())
     {
         if (!empty($isChecked)) {
-            if ($this->isXhtml) {
+            if ($this->isXhtmlStyle) {
                 $moreAttributes['checked'] = 'checked';
             } else {
                 $moreAttributes[] = 'checked';
@@ -325,7 +325,7 @@ class FormHelper
     public function radio($name, $value, $selectedValue = null, $moreAttributes = array())
     {
         if ($value !== null && $selectedValue !== null && $value == $selectedValue) {
-            if ($this->isXhtml) {
+            if ($this->isXhtmlStyle) {
                 $moreAttributes['checked'] = 'checked';
             } else {
                 $moreAttributes[] = 'checked';
@@ -583,7 +583,11 @@ class FormHelper
      */
     public function htmlEscape($string)
     {
-        return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
+        if (version_compare(PHP_VERSION, '5.2.3', '>=')) {
+            return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
+        }
+
+        return htmlspecialchars($string, ENT_QUOTES);
     }
 
     /**
@@ -689,7 +693,7 @@ class FormHelper
 
                 if (!in_array($value, $addedAttributes)) {
                     $addedAttributes[] = $value;
-                    if ($this->isXhtml) {
+                    if ($this->isXhtmlStyle) {
                         $attributeString .= ' ' . $value . '="' . $value . '"';
                     } else {
                         $attributeString .= ' ' . $value;
@@ -802,7 +806,7 @@ class FormHelper
         $attributes = array('value' => $value);
 
         if ($value !== null && $selectedValue !== null && $value == $selectedValue) {
-            if ($this->isXhtml) {
+            if ($this->isXhtmlStyle) {
                 $attributes['selected'] = 'selected';
             } else {
                 $attributes[] = 'selected';

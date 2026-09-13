@@ -1,6 +1,8 @@
 <?php
 
+// include the class file
 require_once('../FormHelper.php');
+// initialize class
 $form = new FormHelper();
 
 $form->setDoPassedStringCleanup(false);
@@ -26,6 +28,7 @@ $state  = $form->getPassed('state');
 $show  = $form->getPassed('show');
 $form_start_time = date('m/d/Y h:i:s A');
 $food = $form->getPassed('food');
+$favoriteUrl = $form->getPassed('favoriteUrl');
 
 // automatically set the HTML element id's to the element names
 $form->setDoAddIdAttributeFromName(true);
@@ -53,9 +56,6 @@ $form->setDoAddIdAttributeFromName(true);
         }
     }
 
-    window.onload = function() {
-        toggleInfo();
-    };
     </script>
 
 </head>
@@ -302,7 +302,21 @@ $form->setDoAddIdAttributeFromName(true);
 		?>
         <ul class="formInfo">
             <li>&lt;select&gt;&lt;option&gt;&lt;/option&gt;&lt;/select&gt;</li>
-            <li>Set by database query results or a similar 2 dimensional array</li>
+            <li>set by database query results or a similar 2 dimensional array</li>
+        </ul>
+    </div>
+
+    <div class="inputContainer">
+        <label for="favoriteUrl">Favorite page URL</label>
+        <?php
+		$form->input('url', 'favoriteUrl', $favoriteUrl);
+		?>
+        <ul class="formInfo">
+            <li>&lt;input type="url" name="favoriteUrl" value="" id="favoriteUrl"&gt;</li>
+            <li>for "url" or other HTML input types that do not have specific function in the class, the 
+                <b>input</b> function can be used. The first parameter is <b>$type</b>.
+                
+            </li>
         </ul>
     </div>
 
