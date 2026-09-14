@@ -10,100 +10,104 @@ class FormHelper
     // Configuration
     // -----------------------------------------------------------------------------
 
-    // configuration variables; see setters for details    
-    private $doAddIdAttributeFromName = false;
-    private $doReturnHtml = false;
-    private $isXhtmlStyle = false;
-    private $doPassedStringCleanup = true;
-    private $doSelectOptionValueEqualsText = false;
+    private $settings = array(
+        // end program on settings/configuration error?
+        // helpful for development, should be false in production
+        'exitProgramOnFailure' => false,
 
+        // automatically add an "id" attribute with the same value as "name"?
+        // does not affect radio inputs because they can have 
+        //      multiple elements with the same "name" attribute
+        // if false, id attributes can be added with the $moreAttributes parameter
+        // if true, id attributes can be overridden with the $moreAttributes parameter
+        // false: <input name="first_name">
+        // true:  <input name="first_name" id="first_name">
+        'addIdAttributeFromName' => false,
+
+        // in a select (dropdown), use each option's display text as its value
+        // if false, the passed options parameter should be an associative
+        //      array: $options = array('blue'=>'Blue', 'light_green'=>'Light Green');
+        // if true, the passed options parameter should be an indexed (non-associative)
+        //      array since the key is ignored: $options = array('Blue', 'Light Green');
+        // false:  <option value="blue">Blue</option><option value="light_green">Light Green</option>
+        // true:  <option value="Blue">Blue</option><option value="Light Green">Light Green</option>
+        'selectOptionValueEqualsDisplayText' => false,
+
+        // trim whitespace from the beginning and end of passed values
+        // used in the getPassed() function
+        // false: " Joe Smith " is unchanged
+        // true: " Joe Smith " is converted to "Joe Smith"
+        'passedStringTrim' => true,
+
+        // removes javascript and html tags from passed values
+        // used in the getPassed() function
+        // false: "Joe <b>Smith</b>" is unchanged
+        // true: "Joe <b>Smith</b>" is converted to "Joe Smith"
+        'passedStringStripTags' => true,
+
+        // converts non-standard characters in passed values
+        // used in the getPassed() function
+        // replaces characters with equivalents when possible, 
+        //  otherwise replaces the character with a dash
+        // false: "© Déjà vu" is unchanged
+        // true: "© Déjà vu" is converted to "- Deja vu"
+        'passedStringConvertToStandardCharacters' => false,
+
+        // return the html elements as a string?
+        // if true, HTML is returned, echo is required
+        // if false, HTML is directly output, echo is NOT required
+        // false: $form->text('name', $name);
+        // true:  echo $form->text('name', $name);
+        // true:  $html = $form->text('name', $name); echo $html;
+        'returnHtml' => false,
+
+        // output html as XHTML-style syntax?
+        // closes self-closing elements and boolean attributes (selected, readonly, etc)
+        //      will have values that match the attribute
+        // false: <input type="text" name="name" readonly>
+        // true:  <input type="text" name="name" readonly="readonly" />
+        'xhtmlStyleOutput' => false
+    );
 
     /**
-     * automatically add an "id" attribute with the same value as "name"?
-     * 
-     * does not affect radio inputs because they can have 
-     * multiple elements with the same "name" attribute
-     * 
-     * if false, id's can be added with the $moreAttributes parameter
-     * 
-     * if true, id's can be overridden with the $moreAttributes parameter
-     * 
-     * default = false
+     * set the configuration variables
+     * values must be valid parameters in the $settings array
+     * example usage $form->updateSetting('addIdAttributeFromName', true);
      */
-    public function setDoAddIdAttributeFromName($value)
+    public function updateSetting($setting, $value)
     {
-        $this->doAddIdAttributeFromName = $this->returnBoolean($value);
+        if (!isset($this->settings[$setting])) {
+            $this->exitProgramError("updateSetting function received invalid setting: " . $setting);
+            return $this;
+        }
+
+        if ($value) {
+            $this->settings[$setting] = true;
+        } else {
+            $this->settings[$setting] = false;
+        }
+        return $this;
     }
 
     /**
-     * return the html elements as a string?
-     * 
-     * if true, html is returned
-     * echo $form->text('name', $name);
-     * $html = $form->text('name', $name); echo $html;
-     * 
-     * if false, html is directly output
-     * $form->text('name', $name);
-     * 
-     * * default = false
+     * set multiple configuration variables at once
+     * wrapper function for updateSetting()
+     * example usage $form->updateSettings(array('addIdAttributeFromName'=>true, 'passedStringTrim'=>false));
      */
-    public function setDoReturnHtml($value)
+    public function updateSettings($settings)
     {
-        $this->doReturnHtml = $this->returnBoolean($value);
-    }
+        if (!is_array($settings)) {
+            $this->exitProgramError("updateSettings was not passed an array");
+            return $this;
+        }
 
-    /**
-     * output html as XHTML-style syntax?
-     * 
-     * self-closing elements
-     * if true  <input type="text" name="name" />
-     * if false <input type="text" name="name">
-     * 
-     * boolean attributes (selected, readonly, etc) will have values that match the attribute
-     * if true  <option value="1" selected="selected"> vs.
-     * if false <option value="1" selected>
-     * 
-     * * default = false
-     */
-    public function setIsXhtmlStyle($value)
-    {
-        $this->isXhtmlStyle = $this->returnBoolean($value);
-    }
+        foreach ($settings as $setting=>$value) {
+            $this->updateSetting($setting, $value);
+        }
 
-    /**
-     * clean up passed values?
-     * 
-     * if true, removes HTML tags (strip_tags) and trims whitespace (php trim)
-     * 
-     * if false, passed variables are unchanged
-     * 
-     * used in getPost(), getGet(), and getPassed() functions
-     * 
-     * default = true
-     */
-    public function setDoPassedStringCleanup($value)
-    {
-        $this->doPassedStringCleanup = $this->returnBoolean($value);
+        return $this;
     }
-
-    /**
-     * make the value equal to the display text for options in dropdown menus (html select)?
-     * 
-     * if true, html select option value and display text will both be set 
-     *      to the passed options array item value. so array(2=>"a", 3=>"b") outputs
-     *      <option value="a">a</option><option value="b">b</option>
-     * 
-     * if false, html select option value will be the array item key and the 
-     *      html display text will be the array item value. so array(2=>"a", 3=>"b") outputs
-     *      <option value="2">a</option><option value="3">b</option>
-     * 
-     * * default = false
-     */
-    public function setDoSelectOptionValueEqualsText($value)
-    {
-        $this->doSelectOptionValueEqualsText = $this->returnBoolean($value);
-    }
-    
+   
 
     // -----------------------------------------------------------------------------
     // Form Container
@@ -530,14 +534,14 @@ class FormHelper
     // -----------------------------------------------------------------------------
     // Request Passed Values (used in redisplaying a form with errors or form processing)
     // -----------------------------------------------------------------------------
-
+    /*
     /**
      * get variables passed by post or get (form or url)
      * 
      * checks that the variable exists, so it will not produce a PHP warning
      * 
      * note that $_POST takes precedence over $GET, so if both are passed $_POST will be returned
-     */
+     * /
     public function getPassed($var, $returnOnfail = '')
     {
         if (isset($_POST[$var])) {
@@ -551,7 +555,7 @@ class FormHelper
 
     /**
      * get variables passed by post (form) 
-     */
+     * /
     public function getPost($var, $returnOnfail = '')
     {
         if (isset($_POST[$var])) {
@@ -563,7 +567,7 @@ class FormHelper
 
     /**
      * get variables passed by get (url parameters) 
-     */
+     * /
     public function getGet($var, $returnOnfail = '')
     {
         if (isset($_GET[$var])) {
@@ -571,6 +575,99 @@ class FormHelper
         }
 
         return $returnOnfail;
+    }*/
+
+    // valid flags = post, get, cookie, int, array, nostrip
+    public static function getPassed($var, $flags = array())
+    {
+        if (!is_array($flags)) {
+            if (!is_string($flags)) {
+                // $flags is not an array of a string, should not happen
+                // return blank
+                return '';
+            } else {
+                // replace commas with spaces
+                $flags = str_replace(',', ' ', $flags);
+                // combine spaces
+                $flags = preg_replace('/\s+/', '-', $id);
+                // remove start and end spaces
+                $flags = trim($flags);
+
+                // convert string to array
+                $flags = explode(' ', $flags);
+            }
+        }
+
+        $returnOnFail = '';
+        if (in_array('array', $flags)) {
+            $returnOnFail = array();
+        } elseif (in_array('int', $flags)) {
+            $returnOnFail = 0;
+        }
+
+        foreach ($flags as $f) {
+            if ($f != 'post' && $f != 'get' && $f != 'cookie' && $f != 'int' && $f != 'array' && $f != 'nostrip') {
+                return $returnOnFail;
+            }
+        }
+
+        if (in_array('post', $flags) && isset($_POST[$var])) {
+            $val = $_POST[$var];
+        } elseif (in_array('get', $flags) && isset($_GET[$var])) {
+            $val = $_GET[$var];
+        } elseif (in_array('cookie', $flags) && isset($_COOKIE[$var])) {
+            $val = $_COOKIE[$var];
+        } elseif (isset($_POST[$var])) {
+            $val = $_POST[$var];
+        } elseif (isset($_GET[$var])) {
+            $val = $_GET[$var];
+        } else {
+            return $returnOnFail;
+        }
+
+
+        if (in_array('array', $flags)) {
+            if (is_array($val)) {
+                return self::getPassedArray($val, $flags);
+            }
+            return array();
+        } elseif (is_array($val)) {
+            return $returnOnFail;
+        } else {
+            if (in_array('int', $flags)) {
+                if (is_numeric($val)) {
+                    return intval($val);
+                }
+                return 0;
+            } else {
+                $val = self::strCleanup($val, !in_array('nostrip', $flagAr));
+                return $val;
+            }
+        }
+    }
+
+    // int, nostrip
+    public static function getPassedArray($ar, $flagAr = array())
+    {
+        if (!is_array($ar)) {
+            return array();
+        }
+
+        foreach ($ar as $k => $v) {
+            if (is_array($v)) {
+                $ar[self::strCleanup($k)] = a_passed_var_ar($ar[$k], $flagAr);
+            } elseif (in_array('int', $flagAr)) {
+                if (is_numeric($v)) {
+                    $ar[self::strCleanup($k)] = intval($v);
+                } else {
+                    $ar[self::strCleanup($k)] = 0;
+                }
+            } else {
+                $val = self::strCleanup($v, !in_array('nostrip', $flagAr));
+                $ar[self::strCleanup($k)] = $val;
+            }
+        }
+        return $ar;
     }
 
 
@@ -591,7 +688,7 @@ class FormHelper
     }
 
     /**
-     * converts value to boolean
+     * converts value to boolean (true or false)
      */
     public function returnBoolean($value)
     {
@@ -820,5 +917,33 @@ class FormHelper
             '</option>';
 
         return $html;
+    }
+
+    /**
+     * end the program on setup error (invalid settings)
+     * only ends the program if exitProgramOnFailure is true
+     * completely stops the page from loading, not just the form
+     */
+    private function exitProgramError($message = '')
+    {
+        if (!$this->settings['exitProgramOnFailure']) {
+            return;
+        }
+
+        // display message
+        echo "\n<br><div>ERROR\n";
+        if (!empty($message)) {
+            echo ": " . $this->htmlEscape($message);
+        }
+        echo "\n</div><br>\n";
+
+        // display error stack trace
+        echo "\n<pre>";
+        $trace = debug_backtrace();
+        array_shift($trace);
+        var_dump($trace);
+        echo "</pre>\n";
+
+        die();
     }
 }
