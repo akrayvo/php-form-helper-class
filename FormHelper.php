@@ -72,7 +72,8 @@ class FormHelper
     /**
      * set the configuration variables
      * values must be valid parameters in the $settings array
-     * example usage $form->updateSetting('addIdAttributeFromName', true);
+     * example usage: $form->updateSetting('addIdAttributeFromName', true);
+     * supports chaining: $form->updateSetting('exitProgramOnFailure', true)->updateSetting('addIdAttributeFromName', true);
      */
     public function updateSetting($setting, $value)
     {
@@ -91,6 +92,7 @@ class FormHelper
 
     /**
      * set multiple configuration variables at once
+     * is passed an array where are keys are settings and array values are values
      * wrapper function for updateSetting()
      * example usage $form->updateSettings(array('addIdAttributeFromName'=>true, 'passedStringTrim'=>false));
      */
@@ -177,7 +179,7 @@ class FormHelper
         $attributes = $this->combineAttributes($attributes, $moreAttributes);
 
         $closingSlash = '';
-        if (!empty($this->isXhtmlStyle)) {
+        if (!empty($this->settings['xhtmlStyleOutput'])) {
             $closingSlash = ' /';
         }
 
@@ -309,7 +311,7 @@ class FormHelper
     public function checkbox($name, $isChecked = false, $value = 1, $moreAttributes = array())
     {
         if (!empty($isChecked)) {
-            if ($this->isXhtmlStyle) {
+            if ($this->settings['xhtmlStyleOutput']) {
                 $moreAttributes['checked'] = 'checked';
             } else {
                 $moreAttributes[] = 'checked';
@@ -329,7 +331,7 @@ class FormHelper
     public function radio($name, $value, $selectedValue = null, $moreAttributes = array())
     {
         if ($value !== null && $selectedValue !== null && $value == $selectedValue) {
-            if ($this->isXhtmlStyle) {
+            if ($this->settings['xhtmlStyleOutput']) {
                 $moreAttributes['checked'] = 'checked';
             } else {
                 $moreAttributes[] = 'checked';
@@ -397,7 +399,7 @@ class FormHelper
                     $this->attributeArrayToString(array('label' => $optionValue)) .
                     '>';
                 foreach ($display as $groupOptionValue => $groupOptionDisplay) {
-                    if ($this->doSelectOptionValueEqualsText) {
+                    if ($this->settings['selectOptionValueEqualsDisplayText']) {
                         $groupOptionValue = $groupOptionDisplay;
                     }
                     $html .= $this->selectOption(
@@ -408,7 +410,7 @@ class FormHelper
                 }
                 $html .= '</optgroup>';
             } else {
-                if ($this->doSelectOptionValueEqualsText) {
+                if ($this->settings['selectOptionValueEqualsDisplayText']) {
                     $optionValue = $display;
                 }
                 $html .= $this->selectOption($display, $optionValue, $value);
@@ -516,7 +518,7 @@ class FormHelper
     /**
      * <button>
      *
-     * note that an id attribute is not automatically added when $doAddIdAttributeFromName is true.
+     * note that an id attribute is not automatically added when addIdAttributeFromName is true.
      * this is because no $name parameter is passed to derive the id from.
      * if an id attribute is needed, it must be passed in the $moreAttributes array
      */
@@ -589,7 +591,7 @@ class FormHelper
                 // replace commas with spaces
                 $flags = str_replace(',', ' ', $flags);
                 // combine spaces
-                $flags = preg_replace('/\s+/', '-', $id);
+                $flags = preg_replace('/\s+/', ' ', $flags);
                 // remove start and end spaces
                 $flags = trim($flags);
 
@@ -681,21 +683,11 @@ class FormHelper
     public function htmlEscape($string)
     {
         if (version_compare(PHP_VERSION, '5.2.3', '>=')) {
+            // htmlspecialchars $encoding parameter add in PHP 5.2.3
             return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
         }
 
         return htmlspecialchars($string, ENT_QUOTES);
-    }
-
-    /**
-     * converts value to boolean (true or false)
-     */
-    public function returnBoolean($value)
-    {
-        if ($value) {
-            return true;
-        }
-        return false;
     }
 
     /**
@@ -749,11 +741,11 @@ class FormHelper
     // -----------------------------------------------------------------------------
 
     /**
-     * output or return the html based on the doReturnHtml setting
+     * output or return the html based on the returnHtml setting
      */
     private function htmlOutputOrReturn($html)
     {
-        if ($this->doReturnHtml) {
+        if ($this->settings['returnHtml']) {
             return $html;
         }
 
@@ -790,7 +782,7 @@ class FormHelper
 
                 if (!in_array($value, $addedAttributes)) {
                     $addedAttributes[] = $value;
-                    if ($this->isXhtmlStyle) {
+                    if ($this->settings['xhtmlStyleOutput']) {
                         $attributeString .= ' ' . $value . '="' . $value . '"';
                     } else {
                         $attributeString .= ' ' . $value;
@@ -810,8 +802,9 @@ class FormHelper
 
     /**
      * finds if the "id" attribute should be automatically added
+     * 
      * requirements:
-     *      $doAddIdAttributeFromName must be true
+     *      addIdAttributeFromName must be true
      *      "name" attribute must be set
      *      "id" attribute must NOT be set
      *      "type" attribute must NOT be "radio". (radios will
@@ -819,7 +812,7 @@ class FormHelper
      */
     private function checkAddIdAttributeFromName($attributes)
     {
-        if (!$this->doAddIdAttributeFromName) {
+        if (!$this->settings['addIdAttributeFromName']) {
             // auto add id setting is off
             return false;
         }
@@ -903,7 +896,7 @@ class FormHelper
         $attributes = array('value' => $value);
 
         if ($value !== null && $selectedValue !== null && $value == $selectedValue) {
-            if ($this->isXhtmlStyle) {
+            if ($this->settings['xhtmlStyleOutput']) {
                 $attributes['selected'] = 'selected';
             } else {
                 $attributes[] = 'selected';
