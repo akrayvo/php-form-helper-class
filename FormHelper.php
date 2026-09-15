@@ -37,13 +37,13 @@ class FormHelper
         // used in the getPassed() function
         // false: " Joe Smith " is unchanged
         // true: " Joe Smith " is converted to "Joe Smith"
-        'passedStringTrim' => true,
+        'passedTrim' => true,
 
         // removes javascript and html tags from passed values
         // used in the getPassed() function
         // false: "Joe <b>Smith</b>" is unchanged
         // true: "Joe <b>Smith</b>" is converted to "Joe Smith"
-        'passedStringStripTags' => true,
+        'passedStripTags' => true,
 
         // converts non-standard characters in passed values
         // used in the getPassed() function
@@ -51,7 +51,7 @@ class FormHelper
         //  otherwise replaces the character with a dash
         // false: "© Déjà vu" is unchanged
         // true: "© Déjà vu" is converted to "- Deja vu"
-        'passedStringConvertToStandardCharacters' => false,
+        'passedConvertToStandardCharacters' => false,
 
         // return the html elements as a string?
         // if true, HTML is returned, echo is required
@@ -94,7 +94,7 @@ class FormHelper
      * set multiple configuration variables at once
      * is passed an array where are keys are settings and array values are values
      * wrapper function for updateSetting()
-     * example usage $form->updateSettings(array('addIdAttributeFromName'=>true, 'passedStringTrim'=>false));
+     * example usage $form->updateSettings(array('addIdAttributeFromName'=>true, 'passedTrim'=>false));
      */
     public function updateSettings($settings)
     {
@@ -103,7 +103,7 @@ class FormHelper
             return $this;
         }
 
-        foreach ($settings as $setting=>$value) {
+        foreach ($settings as $setting => $value) {
             $this->updateSetting($setting, $value);
         }
 
@@ -536,142 +536,79 @@ class FormHelper
     // -----------------------------------------------------------------------------
     // Request Passed Values (used in redisplaying a form with errors or form processing)
     // -----------------------------------------------------------------------------
-    /*
+
     /**
      * get variables passed by post or get (form or url)
      * 
-     * checks that the variable exists, so it will not produce a PHP warning
+     * checks that the variable exists, so it will not produce a PHP warning if the variable is not set
      * 
-     * note that $_POST takes precedence over $GET, so if both are passed $_POST will be returned
-     * /
-    public function getPassed($var, $returnOnfail = '')
+     * note that $_POST takes precedence over $_GET, so if both are passed $_POST will be returned
+     * 
+     * $flags are a list of flags to determine where the data comes from and how it is processed.
+     * 
+     * $flags can be passed as an array or a string separated by commas or spaces. ex:
+     * $flags = array('post', 'float');  or  $flags = "post float";  or   $flags = "post,float";
+     * 
+     * valid $flags: post, get, cookie, int, float, array, strip-tags, no-strip-tags, trim, no-trim, convert, no-convert
+     * post - retrieve the variable from POST only
+     * get - retrieve the variable from GET only
+     * cookie - retrieve the variable from COOKIE only
+     * int - convert retrieved value to an integer
+     * float - convert retrieved value to a float
+     * array - process value as an array, can be used with int or float to process an array of integers or floats
+     * strip-tags, no-strip-tags - override the "passedStripTags" setting. see setting for details
+     * trim, no-trim - override the "passedTrim" setting. see setting for details
+     * convert, no-convert - override the "passedConvertToStandardCharacters" setting. see setting for details
+     */
+    public function getPassed($var, $flags = array())
     {
-        if (isset($_POST[$var])) {
-            return $this->getPost($var, $returnOnfail);
-        } elseif (isset($_GET[$var])) {
-            return $this->getGet($var, $returnOnfail);
+        if (empty($var)) {
+            $this->exitProgramError("no variable name passed to getPassed");
         }
 
-        return $returnOnfail;
+        $processedFlags = $this->processPassedFlags($flags);
+        return $this->getPassedInternal($var, $processedFlags);
     }
 
     /**
-     * get variables passed by post (form) 
-     * /
-    public function getPost($var, $returnOnfail = '')
+     * get variables passed by POST (form)
+     * 
+     * shorthand for calling getPassed with a "post" flag
+     * getPassed("name", "post") is the same as getPost("name")
+     */
+    public function getPost($var, $flags = array())
     {
-        if (isset($_POST[$var])) {
-            return $this->stringCleanup($_POST[$var]);
+        if (is_string($flags)) {
+            $flags .= ', post';
+        } else {
+            if (is_array($flags)) {
+                $flags[] = 'post';
+            } else {
+                $flags = array('post');
+            }
         }
-
-        return $returnOnfail;
+        return $this->getPassed($var, $flags);
     }
 
     /**
-     * get variables passed by get (url parameters) 
-     * /
-    public function getGet($var, $returnOnfail = '')
+     * get variables passed by GET (url query string parameters) 
+     * 
+     * shorthand for calling getPassed with a "get" flag
+     * getPassed("name", "get") is the same as getGet("name")
+     */
+    public function getGet($var, $flags = array())
     {
-        if (isset($_GET[$var])) {
-            return $this->stringCleanup($_GET[$var]);
-        }
-
-        return $returnOnfail;
-    }*/
-
-    // valid flags = post, get, cookie, int, array, nostrip
-    public static function getPassed($var, $flags = array())
-    {
-        if (!is_array($flags)) {
-            if (!is_string($flags)) {
-                // $flags is not an array of a string, should not happen
-                // return blank
-                return '';
-            } else {
-                // replace commas with spaces
-                $flags = str_replace(',', ' ', $flags);
-                // combine spaces
-                $flags = preg_replace('/\s+/', ' ', $flags);
-                // remove start and end spaces
-                $flags = trim($flags);
-
-                // convert string to array
-                $flags = explode(' ', $flags);
-            }
-        }
-
-        $returnOnFail = '';
-        if (in_array('array', $flags)) {
-            $returnOnFail = array();
-        } elseif (in_array('int', $flags)) {
-            $returnOnFail = 0;
-        }
-
-        foreach ($flags as $f) {
-            if ($f != 'post' && $f != 'get' && $f != 'cookie' && $f != 'int' && $f != 'array' && $f != 'nostrip') {
-                return $returnOnFail;
-            }
-        }
-
-        if (in_array('post', $flags) && isset($_POST[$var])) {
-            $val = $_POST[$var];
-        } elseif (in_array('get', $flags) && isset($_GET[$var])) {
-            $val = $_GET[$var];
-        } elseif (in_array('cookie', $flags) && isset($_COOKIE[$var])) {
-            $val = $_COOKIE[$var];
-        } elseif (isset($_POST[$var])) {
-            $val = $_POST[$var];
-        } elseif (isset($_GET[$var])) {
-            $val = $_GET[$var];
+        if (is_string($flags)) {
+            $flags .= ', get';
         } else {
-            return $returnOnFail;
-        }
-
-
-        if (in_array('array', $flags)) {
-            if (is_array($val)) {
-                return self::getPassedArray($val, $flags);
-            }
-            return array();
-        } elseif (is_array($val)) {
-            return $returnOnFail;
-        } else {
-            if (in_array('int', $flags)) {
-                if (is_numeric($val)) {
-                    return intval($val);
-                }
-                return 0;
+            if (is_array($flags)) {
+                $flags[] = 'get';
             } else {
-                $val = self::strCleanup($val, !in_array('nostrip', $flagAr));
-                return $val;
+                $flags = array('get');
             }
         }
+        return $this->getPassed($var, $flags);
     }
-
-    // int, nostrip
-    public static function getPassedArray($ar, $flagAr = array())
-    {
-        if (!is_array($ar)) {
-            return array();
-        }
-
-        foreach ($ar as $k => $v) {
-            if (is_array($v)) {
-                $ar[self::strCleanup($k)] = a_passed_var_ar($ar[$k], $flagAr);
-            } elseif (in_array('int', $flagAr)) {
-                if (is_numeric($v)) {
-                    $ar[self::strCleanup($k)] = intval($v);
-                } else {
-                    $ar[self::strCleanup($k)] = 0;
-                }
-            } else {
-                $val = self::strCleanup($v, !in_array('nostrip', $flagAr));
-                $ar[self::strCleanup($k)] = $val;
-            }
-        }
-        return $ar;
-    }
-
 
     // -----------------------------------------------------------------------------
     // Public Helper Functions
@@ -691,16 +628,72 @@ class FormHelper
     }
 
     /**
-     * remove html tags from string. "<b>hello</b>" becomes "hello"
-     * trim string ex: " hello " becomes "hello"
+     * replace non-standard (non-ASCII) characters with ASCII equivalents or a dash
      */
-    public function stringCleanup($string)
+    public function convertToStandardCharacters($str)
     {
-        if (!$this->doPassedStringCleanup || !is_string($string)) {
-            return $string;
+        // common replacements
+        $replace = array(
+            'a' => array(chr(195) . chr(161), chr(195) . chr(160), chr(195) . chr(162), chr(195) . chr(164)),
+            'A' => array(chr(195) . chr(129), chr(195) . chr(128), chr(195) . chr(130), chr(195) . chr(132)),
+            'e' => array(chr(195) . chr(169), chr(195) . chr(168), chr(195) . chr(170), chr(195) . chr(171)),
+            'E' => array(chr(195) . chr(137), chr(195) . chr(136), chr(195) . chr(138), chr(195) . chr(139)),
+            'i' => array(chr(195) . chr(173), chr(195) . chr(175)),
+            'I' => array(chr(195) . chr(141), chr(195) . chr(143)),
+            'o' => array(chr(195) . chr(179), chr(195) . chr(182)),
+            'O' => array(chr(195) . chr(147), chr(195) . chr(150)),
+            'u' => array(chr(195) . chr(186), chr(195) . chr(188)),
+            'U' => array(chr(195) . chr(154), chr(195) . chr(156)),
+            'n' => array(chr(195) . chr(177)),
+            'N' => array(chr(195) . chr(145)),
+            'c' => array(chr(195) . chr(167)),
+            'C' => array(chr(195) . chr(135)),
+            'ss' => array(chr(195) . chr(159)),
+            'ae' => array(chr(195) . chr(166)),
+            'AE' => array(chr(195) . chr(134)),
+            'oe' => array(chr(197) . chr(147)),
+            'OE' => array(chr(197) . chr(146)),
+            "'" => array(chr(226) . chr(128) . chr(152), chr(226) . chr(128) . chr(153)),
+            '"' => array(chr(226) . chr(128) . chr(156), chr(226) . chr(128) . chr(157)),
+            '-' => array(chr(226) . chr(128) . chr(147), chr(226) . chr(128) . chr(148)),
+            '...' => array(chr(226) . chr(128) . chr(166)),
+            '(c)' => array(chr(194) . chr(169)),
+            '(TM)' => array(chr(226) . chr(132) . chr(162))
+        );
+
+        foreach ($replace as $replacement => $characters) {
+            $str = str_replace($characters, $replacement, $str);
         }
-        $string = trim(strip_tags($string));
-        return $string;
+
+        // use PHP's Intl extension to transliterate other characters
+        if (function_exists('transliterator_transliterate')) {
+            $result = transliterator_transliterate('Any-Latin; Latin-ASCII', $str);
+            if ($result !== false) {
+                $str = $result;
+            }
+        }
+
+        // replace remaining non-standard characters with a dash
+        $str = preg_replace('/[^\x00-\x7F]/', '-', $str);
+
+        return $str;
+    }
+
+    /**
+     * remove HTML tags and script/style blocks from a string
+     * ex: "<b>hello</b>" becomes "hello"
+     */
+    public function stripTags($str)
+    {
+        // remove script and style blocks
+        $str = preg_replace(
+            array('@<script[^>]*?>.*?</script>@si', '@<style[^>]*?>.*?</style>@si'),
+            '',
+            $str
+        );
+
+        // trim html tags and return
+        return strip_tags($str);
     }
 
     /**
@@ -804,11 +797,10 @@ class FormHelper
      * finds if the "id" attribute should be automatically added
      * 
      * requirements:
-     *      addIdAttributeFromName must be true
-     *      "name" attribute must be set
-     *      "id" attribute must NOT be set
-     *      "type" attribute must NOT be "radio". (radios will
-     *          likely have multiple elements with the same name)
+     * addIdAttributeFromName must be true
+     * "name" attribute must be set
+     * "id" attribute must NOT be set
+     * "type" attribute must NOT be "radio". (radios will likely have multiple elements with the same name)
      */
     private function checkAddIdAttributeFromName($attributes)
     {
@@ -828,8 +820,7 @@ class FormHelper
         }
 
         if (!empty($attributes['type'])) {
-            // do NOT automatically add id's to radios based on
-            //      name. multiple radios usually have the same name.
+            // do NOT automatically add id's to radios based on name. multiple radios usually have the same name.
             if ($attributes['type'] === 'radio') {
                 return false;
             }
@@ -930,13 +921,207 @@ class FormHelper
         }
         echo "\n</div><br>\n";
 
-        // display error stack trace
-        echo "\n<pre>";
-        $trace = debug_backtrace();
-        array_shift($trace);
-        var_dump($trace);
-        echo "</pre>\n";
-
         die();
+    }
+
+    /**
+     * format flags for passed variable processing
+     */
+    private function processPassedFlags($flags)
+    {
+        if (empty($flags)) {
+            return array();
+        }
+
+        if (!is_array($flags)) {
+            if (!is_string($flags)) {
+                $this->exitProgramError("flags must be an array or string");
+                return array();
+            }
+
+            // flags is a string
+            // each flag is only lower case characters and dashes
+            // spaces or commas are treated as separators
+
+            // replace commas with spaces
+            $flags = str_replace(',', ' ', $flags);
+            // combine spaces
+            $flags = preg_replace('/\s+/', ' ', $flags);
+            // remove start and end spaces and make lowercase
+            $flags = strtolower(trim($flags));
+
+            // convert string to array
+            $flags = explode(' ', $flags);
+        }
+
+        $newFlags = array();
+        // check for invalid flags
+        $validFlagAr = array('post', 'get', 'cookie', 'int', 'float', 'array', 'strip-tags', 'no-strip-tags', 'trim', 'no-trim', 'convert', 'no-convert');
+        foreach ($flags as $f) {
+            if (in_array($f, $validFlagAr)) {
+                $newFlags[$f] = true;
+            } else {
+                $this->exitProgramError("invalid flag found: " . $f);
+            }
+        }
+        $flags = $newFlags;
+
+        if (!empty($flags['post']) && !empty($flags['get'])) {
+            $this->exitProgramError("incompatible flags passed: post and get");
+        }
+        if (!empty($flags['post']) && !empty($flags['cookie'])) {
+            $this->exitProgramError("incompatible flags passed: post and cookie");
+        }
+        if (!empty($flags['get']) && !empty($flags['cookie'])) {
+            $this->exitProgramError("incompatible flags passed: get and cookie");
+        }
+        if (!empty($flags['int']) && !empty($flags['float'])) {
+            $this->exitProgramError("incompatible flags passed: int and float");
+        }
+        if (!empty($flags['strip-tags']) && !empty($flags['no-strip-tags'])) {
+            $this->exitProgramError("incompatible flags passed: strip-tags and no-strip-tags");
+        }
+        if (!empty($flags['trim']) && !empty($flags['no-trim'])) {
+            $this->exitProgramError("incompatible flags passed: trim and no-trim");
+        }
+        if (!empty($flags['convert']) && !empty($flags['no-convert'])) {
+            $this->exitProgramError("incompatible flags passed: convert and no-convert");
+        }
+
+        return $newFlags;
+    }
+
+    /**
+     * retrieve the passed value from POST, GET, or COOKIE
+     * 
+     * called by getPassed, then passes the retrieved value to getPassedInternalValue
+     */
+    private function getPassedInternal($var, $flags = array())
+    {
+        $returnOnFail = '';
+        if (!empty($flags['array'])) {
+            $returnOnFail = array();
+        } elseif (!empty($flags['int']) || !empty($flags['float'])) {
+            $returnOnFail = 0;
+        }
+
+        if (!empty($flags['post'])) {
+            if (!isset($_POST[$var])) {
+                return $returnOnFail;
+            }
+            $val = $_POST[$var];
+        } elseif (!empty($flags['get'])) {
+            if (!isset($_GET[$var])) {
+                return $returnOnFail;
+            }
+            $val = $_GET[$var];
+        } elseif (!empty($flags['cookie'])) {
+            if (!isset($_COOKIE[$var])) {
+                return $returnOnFail;
+            }
+            $val = $_COOKIE[$var];
+        } elseif (isset($_POST[$var])) {
+            $val = $_POST[$var];
+        } elseif (isset($_GET[$var])) {
+            $val = $_GET[$var];
+        } else {
+            return $returnOnFail;
+        }
+
+        return $this->getPassedInternalValue($val, $flags);
+    }
+
+    /**
+     * takes the passed value and processes it based on settings
+     * 
+     * called by getPassedInternal and getPassedInternalArray, returns the final value
+     */
+    private function getPassedInternalValue($val, $flags)
+    {
+        if (!empty($flags['array'])) {
+            if (is_array($val)) {
+                return $this->getPassedInternalArray($val, $flags);
+            }
+            return array();
+        }
+
+        $returnOnFail = '';
+        if (!empty($flags['int']) || !empty($flags['float'])) {
+            $returnOnFail = 0;
+        }
+
+        if (!empty($flags['int'])) {
+            if (is_numeric($val)) {
+                return intval($val);
+            }
+            return 0;
+        }
+
+        if (!empty($flags['float'])) {
+            if (is_numeric($val)) {
+                return floatval($val);
+            }
+            return 0;
+        }
+
+        if (!is_string($val) && !is_numeric($val) && !is_bool($val)) {
+            return $returnOnFail;
+        }
+
+        $val = strval($val);
+
+
+        if (!empty($flags['no-convert'])) {
+            // no-convert flag passed - do nothing
+        } elseif (empty($flags['convert']) && !$this->settings['passedConvertToStandardCharacters']) {
+            // convert flag not passed and passedConvertToStandardCharacters is false - do nothing
+        } else {
+            $val = $this->convertToStandardCharacters($val, $flags);
+        }
+
+        if (!empty($flags['no-strip-tags'])) {
+            // no-strip-tags flag passed - do nothing
+        } elseif (empty($flags['strip-tags']) && !$this->settings['passedStripTags']) {
+            // strip-tags flag not passed and passedStripTags is false - do nothing
+        } else {
+            $val = $this->stripTags($val);
+        }
+
+        if (!empty($flags['no-trim'])) {
+            // no-trim flag passed - do nothing
+        } elseif (empty($flags['trim']) && !$this->settings['passedTrim']) {
+            // trim flag not passed and passedTrim is false - do nothing
+        } else {
+            $val = trim($val);
+        }
+
+        return $val;
+    }
+
+    /**
+     * recursively process array elements for passed variables
+     * 
+     * called by getPassedInternalValue, calls getPassedInternalValue for non-array values
+     */
+    private function getPassedInternalArray($array, $flags)
+    {
+        if (!is_array($array)) {
+            return array();
+        }
+
+        $flagsNoArray = $flags;
+        if (isset($flagsNoArray['array'])) {
+            unset($flagsNoArray['array']);
+        }
+
+        $return = array();
+        foreach ($array as $k => $v) {
+            if (is_array($v)) {
+                $return[$k] = $this->getPassedInternalArray($v, $flags);
+            } else {
+                $return[$k] = $this->getPassedInternalValue($v, $flagsNoArray);
+            }
+        }
+        return $return;
     }
 }

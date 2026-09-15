@@ -120,3 +120,7 @@ ul {
 .section-label {
   padding: 10px 0 2px 0;
 }
+
+div {
+  margin-bottom:6px;
+}

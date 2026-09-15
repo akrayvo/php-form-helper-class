@@ -5,11 +5,14 @@ require_once('../FormHelper.php');
 // initialize class
 $form = new FormHelper();
 
-$form->setDoPassedStringCleanup(false);
+// replace or remove non-standard (non-ASCII) characters when getting passed values
+$form->updateSetting('passedConvertToStandardCharacters', true);
+// set the id of fields to the name, ex "<input type="text" name="first_name" id="first_name">
+$form->updateSetting('addIdAttributeFromName', true);
 
 
-// get information passed from the form, values will be defaults in the
-// 		form when the page reloads
+// get information passed from the form, values will be used as 
+// 		defaults in the form when the page reloads
 $first_name = $form->getPassed('first_name');
 $favorite_color = $form->getPassed('favorite_color');
 $favorite_number = $form->getPassed('favorite_number');
@@ -29,9 +32,6 @@ $show  = $form->getPassed('show');
 $form_start_time = date('m/d/Y h:i:s A');
 $food = $form->getPassed('food');
 $favoriteUrl = $form->getPassed('favoriteUrl');
-
-// automatically set the HTML element id's to the element names
-$form->setDoAddIdAttributeFromName(true);
 
 ?><!DOCTYPE html>
 <html lang="en">
@@ -65,12 +65,11 @@ $form->setDoAddIdAttributeFromName(true);
     <div><a href="./">&laquo; back to All Examples</a></div><br><br>
     <?php
 
-	// uncomment to view variables passed through the form
-	/*if (!empty($_GET)) {
-		echo '<br><br><br><div><b>Get Variables</b><pre>';
+	if (!empty($_GET)) {
+		echo '<br><br><br><div><b>Passed GET Variables</b><pre>';
 		var_dump($_GET);
 		echo '</pre>';
-	}*/
+	}
 
     // note that this button is outside of the form.
     // it is used to trigger JavaScript, not pass form data.
@@ -90,7 +89,7 @@ $form->setDoAddIdAttributeFromName(true);
     </div>
 
     <div class="inputContainer">
-        <label for='first_name'>First Name</label>
+        <label for="first_name">First Name</label>
         <?php $form->text('first_name', $first_name); ?>
         <ul class="formInfo">
             <li>&lt;input type="text"&gt;</li>
@@ -98,7 +97,7 @@ $form->setDoAddIdAttributeFromName(true);
     </div>
 
     <div class="inputContainer">
-        <label for='favorite_color'>Favorite Color</label>
+        <label for="favorite_color">Favorite Color</label>
         <?php $form->color('favorite_color', $favorite_color); ?>
         <ul class="formInfo">
             <li>&lt;input type="color"&gt;</li>
@@ -106,7 +105,7 @@ $form->setDoAddIdAttributeFromName(true);
     </div>
 
     <div class="inputContainer">
-        <label for='favorite_number'>Favorite Number From 1 To 10</label>
+        <label for="favorite_number">Favorite Number From 1 To 10</label>
         <?php
 		$attributes = array('min' => 1, 'max' => 10);
 		$form->number('favorite_number', $favorite_number, $attributes);
@@ -117,9 +116,9 @@ $form->setDoAddIdAttributeFromName(true);
     </div>
 
     <div class="inputContainer">
-        <label for='form_rating'>Rate this survey on a scale from 1 to 10</label>
+        <label for="form_rating">Rate this survey on a scale from 1 to 10</label>
         <div>Your Rating =
-            <b><span id="from_rating_display"><?php echo $form_rating; ?></span></b>
+            <b><span id="from_rating_display"><?php echo $form->htmlEscape($form_rating); ?></span></b>
         </div>
         <?php
 		$attributes = array(

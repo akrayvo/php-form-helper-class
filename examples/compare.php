@@ -20,10 +20,10 @@
     // initialize class
     $form = new FormHelper();
 
-    // automatically add the id attribute
-    $form->setDoAddIdAttributeFromName(true);
-    // for dropdown (select) inputs, the value is the same as the text displayed
-    $form->setDoSelectOptionValueEqualsText(true);
+    // replace or remove non-standard (non-ASCII) characters when getting passed values
+    $form->updateSetting('passedStringConvertToStandardCharacters', true);
+    // set the id of fields to the name, ex "<input type="text" name="first_name" id="first_name">
+    $form->updateSetting('addIdAttributeFromName', true);
 
     // get passed values. set to empty string ("") if not set. strip tags and trim
     $full_name1 = $form->getPassed('full_name1');
@@ -33,10 +33,10 @@
 
     if (!empty($form_load_time1)) {
         // form can be processed here
-        echo "<b>Form submitted</b>";
+        echo "<div><b>Form submitted</b>";
         echo "<pre>";
         var_dump($_POST); 
-        echo "</pre><br>";
+        echo "</pre></div><br>";
     }
 
     
