@@ -53,6 +53,11 @@ textarea {
   max-width: 260px;
 }
 
+input[type="radio"], 
+input[type="checkbox"] {
+  width: auto;
+}
+
 .formInfo {
   background-color: #e8e8e8;
   padding: 4px 0;
@@ -107,14 +112,19 @@ table {
   border-collapse: collapse;
 }
 
-table td {
+table td, table th {
   padding: 10px;
+  border: 1px solid #AAA;
 }
 
 ul {
-  list-style-position: inside;
-  margin: 0 0 8px 0;
-  padding: 0;
+  list-style-position: outside;
+  margin: 0 0 10px 0;
+  padding: 0 0 0 19px;
+}
+
+ul ul {
+  margin-left:20px;
 }
 
 .section-label {

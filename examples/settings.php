@@ -18,11 +18,17 @@ $form = new FormHelper();
 
 <body>
     <h1>HTML Form Example - Settings</h1>
-    <div><a href="./">&laquo; back to All Examples</a></div><br><br>
+    <div><a href="./">&laquo; back to All Examples</a></div><br>
+
+    <p><b>* note that some examples require form submission and/or viewing source code to illustrate the functionality</b></p>
 
     <?php
     $form->formStart();
     ?>
+
+    <br>
+
+    <div><?php $form->submit('Submit the form'); ?></div><br>
 
     <h2>exitProgramOnFailure</h2>
     <ul>
@@ -136,7 +142,7 @@ $form = new FormHelper();
         echo '';
         $form->updateSetting('selectOptionValueEqualsDisplayText', false);
         $form->select("time_of_day_1", $selectOptions, "");
-        // output: <select name="time_of_day"><option value="">-no answer-</option><option value="day">Daytime</option><option value="night">Nighttime</option></select>
+        // output: <select name="time_of_day_1"><option value="">-no answer-</option><option value="day">Daytime</option><option value="night">Nighttime</option></select>
         echo "\n\n";
         ?>
     </div>
@@ -147,7 +153,7 @@ $form = new FormHelper();
         echo "\n<!-- class output: -->\n";
         $form->updateSetting('selectOptionValueEqualsDisplayText', true);
         $form->select("time_of_day_2", $selectOptions, "");
-        // output: <select name="time_of_day"><option value="-no answer-">-no answer-</option><option value="Daytime">Daytime</option><option value="Nighttime">Nighttime</option></select>
+        // output: <select name="time_of_day_2"><option value="-no answer-">-no answer-</option><option value="Daytime">Daytime</option><option value="Nighttime">Nighttime</option></select>
         echo "\n\n";
         ?>
     </div>
@@ -170,7 +176,7 @@ $form = new FormHelper();
         $form->updateSetting('passedTrim', false);
         echo "set to <b>false</b>: ";
         var_dump($form->getPassed("trim_test"));
-        // output if trim_test with value of " My Text " was passed: string(11) " My Text " 
+        // output if trim_test with value of " My Text " was passed: string(9) " My Text " 
         echo "\n\n";
         ?>
     </div>
@@ -182,7 +188,7 @@ $form = new FormHelper();
         echo "set to <b>true</b>: ";
         var_dump($form->getPassed("trim_test"));
         echo "\n\n";
-        // output if trim_test with value of " My Text " was passed: string(9) "My Text" 
+        // output if trim_test with value of " My Text " was passed: string(7) "My Text" 
         ?>
     </div>
 
@@ -194,7 +200,7 @@ $form = new FormHelper();
 
     <h2>passedStripTags</h2>
     <ul>
-        <li>removes javascript and html tags from passed values</li>
+        <li>remove HTML tags and script/style blocks from passed values</li>
         <li>used in the getPassed() function</li>
         <li>true or false (boolean); default = <b>true</b></li>
     </ul>
@@ -218,7 +224,7 @@ $form = new FormHelper();
         echo "\n\n<!-- class output: -->\n";
         $form->updateSetting('passedStripTags', true);
         echo $form->getPassed("strip_tags_test");
-        // output if strip_tags_test with value of "<b>My Text</b>" was passed: My Text
+        // output if strip_tags_test with value of "<i><b>My Text</b></i>" was passed: My Text
         echo "\n\n";
         ?>
     </div>
@@ -254,7 +260,7 @@ $form = new FormHelper();
         echo "set to <b>false</b>: ";
         echo "\n\n<!-- class output: -->\n";
         echo $form->getPassed("convert_test");
-        // output if convert_test with of string with non-standard characters: (maintain special characters)
+        // output of convert_test with string containing non-standard characters: (maintain special characters)
         echo "\n\n";
         ?>
     </div>
@@ -265,7 +271,46 @@ $form = new FormHelper();
         echo "set to <b>true</b>: ";
         echo "\n\n<!-- class output: -->\n";
         echo $form->getPassed("convert_test");
-        // output if convert_test with of string with with non-standard characters: (replace or remove special characters)
+        // output of convert_test with string containing non-standard characters: (replace or remove special characters)
+        echo "\n\n";
+        ?>
+    </div>
+
+
+    <br><br><br>
+
+
+
+    <h2>returnNullIfUnset</h2>
+    <ul>
+        <li>return NULL when variable is not set</li>
+        <li>by default, when a variable is not set, the return value is "" (empty string), 0, or an empty array depending on if a flag is set to return
+              as an int, float, or array. if this flag is set to true, <i>NULL</i> will be returned instead</li>
+        <li>true or false (boolean); default = <b>false</b></li>
+    </ul>
+
+    <div class="section-label">returnNullIfUnset is set to <b>false</b>..</div>
+    <div>
+        <?php
+        $form->updateSetting('returnNullIfUnset', false);
+        echo "set to <b>false</b>: ";
+        echo "\n<!-- class output: -->\n";
+        $value = $form->getPassed('variable_is_not_set');
+        var_dump($value);
+        // output: string(0) ""
+        echo "\n\n";
+        ?>
+    </div>
+
+    <div class="section-label">returnNullIfUnset is set to <b>true</b>.</div>
+    <div>
+        <?php
+        $form->updateSetting('returnNullIfUnset', true);
+        echo "set to <b>true</b>: ";
+        echo "\n<!-- class output: -->\n";
+        $value = $form->getPassed('variable_is_not_set');
+        var_dump($value);
+        // NULL
         echo "\n\n";
         ?>
     </div>
@@ -302,7 +347,7 @@ $form = new FormHelper();
         echo $form->text("name3b");
         // output: <input type="text" name="name3b" value="">
 
-        echo '<br>';
+        echo "\n<br>\n<br>";
 
         $html = $form->text("name3c");
         echo $html;
@@ -334,8 +379,7 @@ $form = new FormHelper();
         <?php
         echo "\n<!-- class output: -->\n";
         $form->updateSetting('xhtmlStyleOutput', false);
-        $fieldHtml = $form->text("name4a", "", array("readonly"));
-        echo $fieldHtml;
+        $form->text("name4a", "", array("readonly"));
         // output: <input type="text" name="name4a" value="" readonly>
         echo "\n\n";
         ?>
@@ -346,9 +390,8 @@ $form = new FormHelper();
         <?php
         echo "\n<!-- class output: -->\n";
         $form->updateSetting('xhtmlStyleOutput', true);
-        $fieldHtml = $form->text("name4a", "", array("readonly"));
-        echo $fieldHtml;
-        // output: <input type="text" name="name4a" value="" readonly="readonly" />
+        $form->text("name4b", "", array("readonly"));
+        // output: <input type="text" name="name4b" value="" readonly="readonly" />
         echo "\n\n";
         ?>
     </div>

@@ -9,7 +9,8 @@ It takes care of the HTML syntax and encoding when generating form elements. It 
 * PHP >= 5.1
 
 ## Installation
-Add the **FormHelper.php** file to your project.
+Move the **FormHelper.php** file to your project.
+**include** or **require** the file in your code.
 
 ## Basic Example
 HTML / PHP code

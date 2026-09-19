@@ -39,7 +39,7 @@ class FormHelper
         // true: " Joe Smith " is converted to "Joe Smith"
         'passedTrim' => true,
 
-        // removes javascript and html tags from passed values
+        // remove HTML tags and script/style blocks from a string
         // used in the getPassed() function
         // false: "Joe <b>Smith</b>" is unchanged
         // true: "Joe <b>Smith</b>" is converted to "Joe Smith"
@@ -52,6 +52,13 @@ class FormHelper
         // false: "© Déjà vu" is unchanged
         // true: "© Déjà vu" is converted to "- Deja vu"
         'passedConvertToStandardCharacters' => false,
+
+        // return NULL when variable is not set
+        // by default, when a variable is not set, the return value is "" (empty string), 0, or an empty array depending on if a flag is set to return
+        //      as an int, float, or array. if this is set to true, null will be returned instead
+        // false: unset variable returns "" (empty string)
+        // true:  unset variable returns NULL
+        'returnNullIfUnset' => false,
 
         // return the html elements as a string?
         // if true, HTML is returned, echo is required
@@ -591,7 +598,7 @@ class FormHelper
     }
 
     /**
-     * get variables passed by GET (url query string parameters) 
+     * get variables passed by GET (URL query string parameters) 
      * 
      * shorthand for calling getPassed with a "get" flag
      * getPassed("name", "get") is the same as getGet("name")
@@ -997,9 +1004,11 @@ class FormHelper
      * called by getPassed, then passes the retrieved value to getPassedInternalValue
      */
     private function getPassedInternal($var, $flags = array())
-    {
+    {        
         $returnOnFail = '';
-        if (!empty($flags['array'])) {
+        if ($this->settings['returnNullIfUnset']) {
+            $returnOnFail = null;
+        } elseif (!empty($flags['array'])) {
             $returnOnFail = array();
         } elseif (!empty($flags['int']) || !empty($flags['float'])) {
             $returnOnFail = 0;
@@ -1038,33 +1047,40 @@ class FormHelper
      */
     private function getPassedInternalValue($val, $flags)
     {
+        $returnOnFail = '';
+        if ($this->settings['returnNullIfUnset']) {
+            $returnOnFail = null;
+        } elseif (!empty($flags['array'])) {
+            $returnOnFail = array();
+        } elseif (!empty($flags['int']) || !empty($flags['float'])) {
+            $returnOnFail = 0;
+        }
+
         if (!empty($flags['array'])) {
             if (is_array($val)) {
                 return $this->getPassedInternalArray($val, $flags);
             }
-            return array();
-        }
-
-        $returnOnFail = '';
-        if (!empty($flags['int']) || !empty($flags['float'])) {
-            $returnOnFail = 0;
+            return $returnOnFail;
         }
 
         if (!empty($flags['int'])) {
             if (is_numeric($val)) {
                 return intval($val);
             }
-            return 0;
+            return $returnOnFail;
         }
 
         if (!empty($flags['float'])) {
             if (is_numeric($val)) {
                 return floatval($val);
             }
-            return 0;
+            return $returnOnFail;
         }
 
+        // process as a string
+
         if (!is_string($val) && !is_numeric($val) && !is_bool($val)) {
+            // type is not easily converted to a string, fail
             return $returnOnFail;
         }
 

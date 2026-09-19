@@ -34,6 +34,11 @@
             <td style="white-space:nowrap;"><a href="./settings.php">settings.php</a></td>
             <td>An example demonstrating the configuration settings available in the class.</td>
         </tr>
+        <tr>
+            <td style="white-space:nowrap;"><a href="./passed-values.php">passed-values.php</a></td>
+            <td>An example demonstrating different ways to retrieve form data for displaying or processing.</td>
+        </tr>
+        
 	</table>
 </body>
 
