@@ -53,12 +53,13 @@ class FormHelper
         // true: "© Déjà vu" is converted to "- Deja vu"
         'passedConvertToStandardCharacters' => false,
 
-        // return NULL when variable is not set
+        // return NULL when variable is not available (not set or invalid)
         // by default, when a variable is not set, the return value is "" (empty string), 0, or an empty array depending on if a flag is set to return
         //      as an int, float, or array. if this is set to true, null will be returned instead
+        // will also return NULL when a variable doesn't match the settings. for instance, the 'array' flag is set, but the value is not an array
         // false: unset variable returns "" (empty string)
         // true:  unset variable returns NULL
-        'returnNullIfUnset' => false,
+        'returnNullIfUnavailable' => false,
 
         // return the html elements as a string?
         // if true, HTML is returned, echo is required
@@ -998,6 +999,26 @@ class FormHelper
         return $newFlags;
     }
 
+    /** 
+     * get the default return value (value when variable is not set) 
+     * 
+     * depends on if the returnNullIfUnavailable settings is true and if the int, float, or array flags are set 
+     */
+    private function getReturnOnFail($flags = array()) 
+    { 
+        if ($this->settings['returnNullIfUnavailable']) 
+        { 
+            return null; 
+        }
+        if (!empty($flags['array'])) { 
+            return array(); 
+        } 
+        if (!empty($flags['int']) || !empty($flags['float'])) { 
+            return 0; 
+        } 
+        return "";
+    }
+
     /**
      * retrieve the passed value from POST, GET, or COOKIE
      * 
@@ -1005,14 +1026,7 @@ class FormHelper
      */
     private function getPassedInternal($var, $flags = array())
     {        
-        $returnOnFail = '';
-        if ($this->settings['returnNullIfUnset']) {
-            $returnOnFail = null;
-        } elseif (!empty($flags['array'])) {
-            $returnOnFail = array();
-        } elseif (!empty($flags['int']) || !empty($flags['float'])) {
-            $returnOnFail = 0;
-        }
+        $returnOnFail = $this->getReturnOnFail($flags);
 
         if (!empty($flags['post'])) {
             if (!isset($_POST[$var])) {
@@ -1047,14 +1061,7 @@ class FormHelper
      */
     private function getPassedInternalValue($val, $flags)
     {
-        $returnOnFail = '';
-        if ($this->settings['returnNullIfUnset']) {
-            $returnOnFail = null;
-        } elseif (!empty($flags['array'])) {
-            $returnOnFail = array();
-        } elseif (!empty($flags['int']) || !empty($flags['float'])) {
-            $returnOnFail = 0;
-        }
+        $returnOnFail = $this->getReturnOnFail($flags);
 
         if (!empty($flags['array'])) {
             if (is_array($val)) {

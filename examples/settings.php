@@ -280,19 +280,19 @@ $form = new FormHelper();
     <br><br><br>
 
 
-
-    <h2>returnNullIfUnset</h2>
+    <h2>returnNullIfUnavailable</h2>
     <ul>
-        <li>return NULL when variable is not set</li>
+        <li>return NULL when variable is not available (not set or invalid)</li>
         <li>by default, when a variable is not set, the return value is "" (empty string), 0, or an empty array depending on if a flag is set to return
-              as an int, float, or array. if this flag is set to true, <i>NULL</i> will be returned instead</li>
+              as an int, float, or array. if this is set to true, null will be returned instead</li>
+        <li>will also return NULL when a variable doesn't match the settings. for instance, the 'array' flag is set, but the value is not an array</li>
         <li>true or false (boolean); default = <b>false</b></li>
     </ul>
 
-    <div class="section-label">returnNullIfUnset is set to <b>false</b>..</div>
+    <div class="section-label">returnNullIfUnavailable is set to <b>false</b>..</div>
     <div>
         <?php
-        $form->updateSetting('returnNullIfUnset', false);
+        $form->updateSetting('returnNullIfUnavailable', false);
         echo "set to <b>false</b>: ";
         echo "\n<!-- class output: -->\n";
         $value = $form->getPassed('variable_is_not_set');
@@ -302,10 +302,10 @@ $form = new FormHelper();
         ?>
     </div>
 
-    <div class="section-label">returnNullIfUnset is set to <b>true</b>.</div>
+    <div class="section-label">returnNullIfUnavailable is set to <b>true</b>.</div>
     <div>
         <?php
-        $form->updateSetting('returnNullIfUnset', true);
+        $form->updateSetting('returnNullIfUnavailable', true);
         echo "set to <b>true</b>: ";
         echo "\n<!-- class output: -->\n";
         $value = $form->getPassed('variable_is_not_set');
