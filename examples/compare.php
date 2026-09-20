@@ -1,9 +1,3 @@
-<?php
-
-// include the class file and create a new object.
-require_once('../FormHelper.php');
-
-?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -11,7 +5,7 @@ require_once('../FormHelper.php');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HTML Form Example - Comparison</title>
-    <link rel="stylesheet" href="./style.css?x=2">
+    <link rel="stylesheet" href="./style.css">
 </head>
 
 <body>
@@ -21,12 +15,15 @@ require_once('../FormHelper.php');
     <h2>Display form using the class</h2>
     <?php 
 
-    // initialzie class
+    // include the class file
+    require_once('../FormHelper.php');
+    // initialize class
     $form = new FormHelper();
-    // automatically add the id field
-    $form->setDoAddIdAttributeFromName(true);
-    // for dropdown (select) inputs, the value is the same as the text displayed
-    $form->setDoSelectOptionValueEqualsText(true);
+
+    // replace or remove non-standard (non-ASCII) characters when getting passed values
+    $form->updateSetting('passedStringConvertToStandardCharacters', true);
+    // set the id of fields to the name, ex "<input type="text" name="first_name" id="first_name">
+    $form->updateSetting('addIdAttributeFromName', true);
 
     // get passed values. set to empty string ("") if not set. strip tags and trim
     $full_name1 = $form->getPassed('full_name1');
@@ -36,10 +33,10 @@ require_once('../FormHelper.php');
 
     if (!empty($form_load_time1)) {
         // form can be processed here
-        echo "<b>Form submitted</b>";
+        echo "<div><b>Form submitted</b>";
         echo "<pre>";
         var_dump($_POST); 
-        echo "</pre><br>";
+        echo "</pre></div><br>";
     }
 
     
@@ -62,7 +59,7 @@ require_once('../FormHelper.php');
     <div>Comments</div>
     <?php $form->textarea('comments1', $comments1); ?><br><br>
 
-    <?php $form->button('Save Info') ?>
+    <?php $form->button('Save Info'); ?>
 
     <?php $form->formEnd(); ?>
 
@@ -110,7 +107,7 @@ require_once('../FormHelper.php');
         <input type="hidden" name="form_load_time2" id="form_load_time2" value="<?php echo date('h:i:sA'); ?>">
 
         <div>Full Name</div>
-        <input type="text" name="full_name2" id="full_name2" value="<?php echo htmlentities($full_name2); ?>"><br><br>
+        <input type="text" name="full_name2" id="full_name2" value="<?php echo htmlspecialchars($full_name2); ?>"><br><br>
 
         <div>Favorite Color</div>
         <select name="color2" id="color2">
@@ -123,7 +120,7 @@ require_once('../FormHelper.php');
 
         <div>Comments</div>
         <textarea name="comments2" id="comments2"><?php 
-            echo htmlentities($comments2); 
+            echo htmlspecialchars($comments2); 
         ?></textarea><br><br>
 
         <button>Save Info</button>

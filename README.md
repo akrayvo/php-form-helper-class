@@ -1,36 +1,38 @@
 # PHP Form Helper Class
-[View on Github »](https://github.com/akrayvo/php-form-helper-class)
+[View on GitHub »](https://github.com/akrayvo/php-form-helper-class)
 
 A simple class to display HTML form elements using PHP. 
 
-The goal of this class is to make displaying forms simple. It takes care of the syntax and encoding when adding HTML form input elements. It does NOT handle all HTML (containers, labels, etc.), validation data, or process data.
+It takes care of the HTML syntax and encoding when generating form elements. It does **not** handle all HTML (labels, line breaks, etc.), validation, or data processing.
 
 ## Requirements
 * PHP >= 5.1
 
 ## Installation
-Add the **FormHelper.php** file to your project.
+Move the **FormHelper.php** file to your project.
+**include** or **require** the file in your code.
 
 ## Basic Example
 HTML / PHP code
 ```
 <?php
 
-// include the class file and create a new object.
+// include the class file
 require_once('../FormHelper.php');
+// initialize class
 $form = new FormHelper();
 
 // get the value passed to the page. check both $_POST and $_GET
 $name = $form->getPassed('name');
 
-// options for select (dropdown menu)
-$colors = [
+// hard-coded options for a select (dropdown menu) field
+// in actual usage, this data could also come from a database or data file
+$colors = array(
     '' => '- select a color -',
     'blue' => 'Blue',
     'green' => 'Green',
     'lightBlue' => 'Light Blue',
-    'red' => 'Red'];
-
+    'red' => 'Red');
 ?>
 
 <?php 
@@ -38,19 +40,19 @@ $colors = [
 $form->formStart(); 
 ?>
 
-    <div>Name</div>    
+    <div><label>Name</label></div>    
     <?php
     // text input <input type="text">
     $form->text('name', $name);
     ?><br><br>
     
-    <div>Favorite Color</div>
+    <div><label>Favorite Color</label></div>
     <?php 
     // select (dropdown) with options <select><option>
     $form->select('colors', $colors);
     ?><br><br>
     
-    <div>Comments</div>
+    <div><label>Comments</label></div>
     <?php 
     // textarea (large text input) <textarea>
     $form->textarea('comments');
@@ -58,7 +60,7 @@ $form->formStart();
     
     <?php 
     // submit button <input type="submit">
-    $form->submit('Save Info')
+    $form->submit('Save Info');
     ?>
 
 <?php 
@@ -68,22 +70,22 @@ $form->formEnd(); ?>
 Generated HTML
 ```
 <form action="/yourPage.php" method="post">
-    <div>Name</div>    
+    <div><label>Name</label></div>    
     <input type="text" name="name" value=""><br><br>
     
-    <div>Favorite Color</div>
+    <div><label>Favorite Color</label></div>
     <select name="colors"><option value="">- select a color -</option><option value="blue">Blue</option><option value="green">Green</option><option value="lightBlue">Light Blue</option><option value="red">Red</option></select><br><br>
     
-    <div>Comments</div>
+    <div><label>Comments</label></div>
     <textarea name="comments"></textarea><br><br>
-
-    <input type="submit" name="submit" value="Save Info">
+    
+    <input type="submit" name="submitInputButton" value="Save Info">
 </form>
 ```
 
-## Comparison of a setting up a form with and without using this class
+## Using the class vs. standard PHP/HTML
 
-### Getting values from the form and cleanup (trimming and removing html tags)
+### Getting values from the form and cleanup (trimming and removing HTML tags)
 
 without class
 ```
@@ -123,12 +125,12 @@ $form->formEnd();
 
 without class
 ```
-<input type="text" name="full_name" id="full_name" value="<?php echo htmlentities($full_name); ?>" placeholder="Full Name">
+<input type="text" name="full_name" id="full_name" value="<?php echo htmlspecialchars($full_name); ?>" placeholder="Full Name">
 ```
 
 with class - if doAddIdAttributeFromName is set to true - $form->setDoAddIdAttributeFromName(true);
 ```
-<?php $form->text('full_name', $full_name, ["placeholder"=>"Full Name"]); ?>
+<?php $form->text("full_name", $full_name, array("placeholder"=>"Full Name")); ?>
 ```
 
 ### Dropdown menu (select)
@@ -138,7 +140,7 @@ without class
 <select name="color">
     <option value="" <?php if ($color == "") { echo "selected"; } ?>></option>
     <option value="red" <?php if ($color == "red") { echo "selected"; } ?>>red</option>
-    <option value="green" <?php if ($color == "green") { echo "selected"; } ?>>blue</option>
+    <option value="blue" <?php if ($color == "blue") { echo "selected"; } ?>>blue</option>
     <option value="red &amp; blue" <?php if ($color == "red & blue") { echo "selected"; } ?>>red &amp; blue</option>
 </select>
 ```
@@ -146,7 +148,7 @@ without class
 with class
 ```
 <?php
-$colors = array('', 'red', 'blue', 'red & blue');
+$colors = array(""=>"", "red"=>"red", "blue"=>"blue", "red & blue"=>"red & blue");
 $form->select('color', $colors, $color);
 ?>
 ```
@@ -167,44 +169,64 @@ $form->checkbox('is_checked', $is_checked);
 ## Settings
 
 ### private $doAddIdAttributeFromName = false;
-* automatically add an `id` attribute with the same value as `name`
-* does not affect radio inputs because they can have multiple elements with the same `name`
-* if set to false, `id` can be by added with the `$moreAttributes` parameter
-* if set to true, `id` can be by overridden with the `$moreAttributes` parameter 
+* automatically add an `id` attribute with the same value as the `name` attribute
+* does not affect radio inputs because they can have multiple elements with the same name attribute
+* does not affect buttons because the button() function does not have a name parameter
+* if set to false, `id` can be added with the `$moreAttributes` parameter
+* if set to true, `id` can be overridden with the `$moreAttributes` parameter 
 ```
+// $doAddIdAttributeFromName = false | parameter not passed, no id attribute
 $form->setDoAddIdAttributeFromName(false);
 $form->text('first_name');
 // <input type="text" name="first_name" value="">
 
-$form->setDoAddIdAttributeFromName(true);
-$form->text('first_name');
+// $doAddIdAttributeFromName = false | parameter passed, id set
+$form->setDoAddIdAttributeFromName(false);
+$form->text("first_name", "", array("id"=>"first_name"));
 // <input type="text" name="first_name" value="" id="first_name">
+
+// $doAddIdAttributeFromName = true | id automatically added
+$form->setDoAddIdAttributeFromName(true);
+$form->text("first_name");
+// <input type="text" name="first_name" value="" id="first_name">
+
+// $doAddIdAttributeFromName = true | auto id overridden by passed parameter
+$form->setDoAddIdAttributeFromName(true);
+$moreAttributes = array('id'=>'f_name');
+$form->text('first_name', '', $moreAttributes);
+// <input type="text" name="first_name" value="" id="f_name">
 ```
 
 ### private $doReturnHtml = false;
 * return the HTML elements as a string
-* if not set, output is written to the screen
+* if false, output is output directly (no echo required commend)
 ```
+// $doReturnHtml = false | echo is not required
 $form->setDoReturnHtml(false);
-$form->text('first_name');
+$form->text("first_name");
 // <input type="text" name="first_name" value="">
 
+// $doReturnHtml = true | echo is required
 $form->setDoReturnHtml(true);
-$html = $form->text('first_name');
+$html = $form->text("first_name");
 // (outputs nothing)
 echo $html;
 // <input type="text" name="first_name" value="">
 ```
      
-### private $isXhtml = false;
-* close tag elements, ex: `<input type="input" name="name" /> vs <input type="input" name="name">`
-* boolean attributes will have values, ex: `<option value="1" selected="selected">` vs. `<option value="1" selected>`
+### private $isXhtmlStyle = false;
+* output XHTML-style HTML
+* use a closing slash on HTML tags that do not require a closing tag, ex: `<input type="text" name="name">` vs `<input type="text" name="name" />`
+* add an attribute name for attributes that do not require them, ex: `<button disabled>Submit</button>` vs. `<button disabled="disabled">Submit</button>` vs. 
+* note that this should generally be false, but can be set to true for consistency with existing code 
 ```
-$form->setIsXhtml(false);
+// $isXhtmlStyle = false
+$form->setIsXhtmlStyle(false);
 $form->text('first_name', '', ['readonly']);
 // <input type="text" name="first_name" value="" readonly>
 
-$form->setIsXhtml(true);
+// $isXhtmlStyle = true
+$form->setIsXhtmlStyle(true);
 $form->text('first_name', '', ['readonly']);
 // <input type="text" name="first_name" value="" readonly="readonly" />
 ```
@@ -234,7 +256,7 @@ $form->text('first_name', $first_name);
 * if set, `select` `option` `value` and display text will both be set to the options array item value, so `[2=>'a', => 3=>'b']` will output `<option value="a">a</option><option value="b">b</option>`
 * if NOT set, `select` `option` `value` will be the array key and the display text will be the array value, so `[2=>'a', => 3=>'b']` will output `<option value="2">a</option><option value="3">b</option>`
 ```
-$options = ['NY'=>'New York', 'OH'=>'Ohio'];
+$options = array('NY'=>'New York', 'OH'=>'Ohio');
 
 $form->setDoSelectOptionValueEqualsText(false);
 $form->select('state', $options);
@@ -253,7 +275,7 @@ If the key is numeric, it will be handled as a boolean attribute (with no value 
 Common attributes would include `id`, `class`, `style`, `placeholder`, etc.
 
 ```
-$moreAttributes = ['style'=>'padding:20px;', 'placeholder'=>'Name', 'readonly'];
+$moreAttributes = array('style'=>'padding:20px;', 'placeholder'=>'Name', 'readonly');
 $form->text('name', '', $moreAttributes);
 ```
 HTML output
@@ -266,35 +288,35 @@ HTML output
 ### Settings
 * `setDoAddIdAttributeFromName($value)` - set $doAddIdAttributeFromName
 * `setDoReturnHtml($value)` - set $doReturnHtml
-* `setIsXhtml($value)` - set $isXhtml
+* `setIsXhtmlStyle($value)` - set $isXhtmlStyle
 * `setDoPassedStringCleanup($value)` - set $doPassedStringCleanup
 * `setDoSelectOptionValueEqualsText($value)` - set $doSelectOptionValueEqualsText
 ### String Manipulation
 * `htmlEscape($string)` - escape a string to display in HTML
 * `stringCleanup($string)` - strips HTML tags from a string
 ### Get Passed Data
-* `getPassed($var, $returnOnfail = '')` - retrive a value from $_GET or $_POST
-* `getPost($var, $returnOnfail = '')` - retrive a value from $_POST
-* `getGet($var, $returnOnfail = '')` - retrive a value from $_GET
+* `getPassed($var, $returnOnfail = '')` - retrieve a value from $_GET or $_POST
+* `getPost($var, $returnOnfail = '')` - retrieve a value from $_POST
+* `getGet($var, $returnOnfail = '')` - retrieve a value from $_GET
 ### input elements &lt;input&gt;
-* `hidden($name, $value = '', $moreAttributes = [])` - `<input type="hidden">`
-* `text($name, $value = '', $moreAttributes = [])` - `<input type="text">`
-* `color($name, $value = '', $moreAttributes = [])` - `<input type="color">`
-* `number($name, $value = '', $moreAttributes = [])` - `<input type="number">`
-* `range($name, $min, $max, $value = '', $moreAttributes = [])` - `<input type="range">`
-* `email($name, $value = '', $moreAttributes = [])` - `<input type="email">`
-* `tel($name, $value = '', $moreAttributes = [])` - `<input type="tel">`
-* `date($name, $value = '', $moreAttributes = [])` - `<input type="date">`
-* `password($name, $moreAttributes = [])` - `<input type="password">`
-* `checkbox($name, $isChecked = false, $value = 1, $moreAttributes = [])` - `<input type="checkbox">`
-* `radio($name, $value, $selectedValue = '', $moreAttributes = [])` - `<input type="radio">`
-* `submit($value = '', $name = '',  $moreAttributes = [])` - `<input type="submit">`
-* `reset($value = '', $name = '',  $moreAttributes = [])` - `<input type="reset">`
+* `hidden($name, $value = '', $moreAttributes = array())` - `<input type="hidden">`
+* `text($name, $value = '', $moreAttributes = array())` - `<input type="text">`
+* `color($name, $value = '', $moreAttributes = array())` - `<input type="color">`
+* `number($name, $value = '', $moreAttributes = array())` - `<input type="number">`
+* `range($name, $min, $max, $value = '', $moreAttributes = array())` - `<input type="range">`
+* `email($name, $value = '', $moreAttributes = array())` - `<input type="email">`
+* `tel($name, $value = '', $moreAttributes = array())` - `<input type="tel">`
+* `date($name, $value = '', $moreAttributes = array())` - `<input type="date">`
+* `password($name, $moreAttributes = array())` - `<input type="password">`
+* `checkbox($name, $isChecked = false, $value = 1, $moreAttributes = array())` - `<input type="checkbox">`
+* `radio($name, $value, $selectedValue = '', $moreAttributes = array())` - `<input type="radio">`
+* `submit($value = '', $name = '',  $moreAttributes = array())` - `<input type="submit">`
+* `reset($value = '', $name = '',  $moreAttributes = array())` - `<input type="reset">`
 
 ### Other form elements
 * `formStart($action = '', $method = '', $moreAttributes = array())` - `<form>`
 * `formEnd()` - `</form>`
-* `textarea($name, $value = '', $moreAttributes = [])` - `<textarea>`
-* `button($html = 'Submit', $moreAttributes = [])` - `<button>`
-* `select($name, $options, $value = null, $moreAttributes = [])` - `<select><option>`
-* `selectByRecordSet($name, $records, $valueKey, $displayKey, $emptyText = '', $value = null, $moreAttributes = [])` - `<select><option>`
+* `textarea($name, $value = '', $moreAttributes = array())` - `<textarea>`
+* `button($html = 'Submit', $moreAttributes = array())` - `<button>`
+* `select($name, $options, $value = null, $moreAttributes = array())` - `<select><option>`
+* `selectByRecordSet($name, $records, $valueKey, $displayKey, $emptyText = '', $value = null, $moreAttributes = array())` - `<select><option>`

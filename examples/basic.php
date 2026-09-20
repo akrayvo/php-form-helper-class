@@ -1,7 +1,8 @@
 <?php
 
-// include the class file and create a new object.
+// include the class file
 require_once('../FormHelper.php');
+// initialize class
 $form = new FormHelper();
 
 // get the value passed to the page. check both $_POST and $_GET
@@ -9,14 +10,15 @@ $name = $form->getPassed('name');
 $color = $form->getPassed('color');
 $comments = $form->getPassed('comments');
 
-// options for select (dropdown menu)
-$colors = [
+// hard-coded options for select (dropdown menu) field
+// in actual usage, this data could also come from a database or data file
+$colors = array(
     '' => '- select a color -',
     'blue' => 'Blue',
     'green' => 'Green',
     'lightBlue' => 'Light Blue',
     'red' => 'Red'
-];
+);
 
 ?><!DOCTYPE html>
 <html lang="en">
@@ -34,16 +36,16 @@ $colors = [
 
     <?php $form->formStart(); ?>
 
-    <div>Name</div>
+    <div><label>Name</label></div>
     <?php $form->text('name', $name); ?><br><br>
 
-    <div>Favorite Color</div>
+    <div><label>Favorite Color</label></div>
     <?php $form->select('color', $colors, $color); ?><br><br>
 
-    <div>Comments</div>
+    <div><label>Comments</label></div>
     <?php $form->textarea('comments', $comments); ?><br><br>
 
-    <?php $form->submit('Save Info') ?>
+    <?php $form->submit('Save Info'); ?>
 
     <?php $form->formEnd(); ?>
 
