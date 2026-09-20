@@ -16,7 +16,7 @@
     <?php 
 
     // include the class file
-    require_once('../FormHelper.php');
+    require_once('../FormHelper.class.php');
     // initialize class
     $form = new FormHelper();
 
