@@ -72,16 +72,16 @@
     <?php 
 
     // get passed values. set to empty string ("") if not set. strip tags and trim
-    $full_name2 = $color2 = $comments2 = $form_load_time2 = "";
+    $full_name2 = $sport2 = $comments2 = $form_load_time2 = "";
     if (isset($_POST['full_name2'])) {
         $full_name2 = $_POST['full_name2'];
         $full_name2 = strip_tags($full_name2);
         $full_name2 = trim($full_name2);
     }
-    if (isset($_POST['color2'])) {
-        $color2 = $_POST['color2'];
-        $color2 = strip_tags($color2);
-        $color2 = trim($color2);
+    if (isset($_POST['sport2'])) {
+        $sport2 = $_POST['sport2'];
+        $sport2 = strip_tags($sport2);
+        $sport2 = trim($sport2);
     }
     if (isset($_POST['comments2'])) {
         $comments2 = $_POST['comments2'];
@@ -108,14 +108,12 @@
 
         <div>Full Name</div>
         <input type="text" name="full_name2" id="full_name2" value="<?php echo htmlspecialchars($full_name2); ?>"><br><br>
-
         <div>Favorite Color</div>
-        <select name="color2" id="color2">
-            <option value="" <?php if ($color2 === "") { echo "selected"; } ?>></option>
-            <option value="red" <?php if ($color2 === "red") { echo "selected"; } ?>>red</option>
-            <option value="green" <?php if ($color2 === "green") { echo "selected"; } ?>>green</option>
-            <option value="blue" <?php if ($color2 === "blue") { echo "selected"; } ?>>blue</option>
-            <option value="red &amp; blue" <?php if ($color2 === "red & blue") { echo "selected"; } ?>>red &amp; blue</option>
+        <select name="sport2" id="sport2">
+            <option value="" <?php if ($sport2 === "") { echo "selected"; } ?>></option>
+            <option value="Baseball &amp; Softball" <?php if ($sport2 === "Baseball & Softball") { echo "selected"; } ?>>Baseball &amp; Softball</option>
+            <option value="Basketball" <?php if ($sport2 === "Basketball") { echo "selected"; } ?>>Basketball</option>
+            <option value="Football" <?php if ($sport2 === "Football") { echo "selected"; } ?>>Football</option>
         </select><br><br>
 
         <div>Comments</div>

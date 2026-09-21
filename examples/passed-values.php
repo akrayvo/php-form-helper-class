@@ -27,6 +27,8 @@ if (!isset($_COOKIE['getPassed_cookie_test'])) {
     <h1>HTML Form Example - getPassed</h1>
     <div><a href="./">&laquo; back to All Examples</a></div>
 
+    <br>
+
     <p>
         Processing forms generally requires handling passed from POST or GET. Check that the data exists, set it to a value, and
         manipulate it. This class does all of this using the <b>getPassed()</b> function.
@@ -35,6 +37,8 @@ if (!isset($_COOKIE['getPassed_cookie_test'])) {
     <p>
         Note that this class focuses on displaying forms and retrieving data. It is <b>not</b> focused on validation (checking that required fields are entered that strings are formatted correctly) or processing (send emails from mail form or saving data to a database).
     </p>
+
+    <br>
 
     <h2>Related Settings</h2>
 
@@ -79,7 +83,7 @@ if (!isset($_COOKIE['getPassed_cookie_test'])) {
     </ul>
 
 
-    <br>
+    <br><br>
 
     <h2>Functions</h2>
 
@@ -109,7 +113,7 @@ if (!isset($_COOKIE['getPassed_cookie_test'])) {
     </ul>
 
 
-    <br>
+    <br><br>
 
     <h2>flags</h2>
 
@@ -126,7 +130,7 @@ if (!isset($_COOKIE['getPassed_cookie_test'])) {
         <li><b>convert</b>, <b>no-convert</b> - override the "passedConvertToStandardCharacters" setting. see setting for details</li>
     </ul>
 
-
+    <br><br>
 
     <h2>Form processing examples</h2>
 
@@ -135,7 +139,7 @@ if (!isset($_COOKIE['getPassed_cookie_test'])) {
     <p>Submit form and scroll to the bottom of the page to see how POST variables are retrieved using the class</p>
 
     <div>
-        <?php $form->formStart($_SERVER['PHP_SELF'].'#form_output', 'post'); ?>
+        <?php $form->formStart($_SERVER['PHP_SELF'] . '#form_output', 'post'); ?>
 
         <?php $form->hidden('post_submitted', '1'); ?>
 
@@ -178,13 +182,15 @@ if (!isset($_COOKIE['getPassed_cookie_test'])) {
 
     </div>
 
+    <br><br><br>
+
 
     <h3>GET form</h3>
 
     <p>Submit form and scroll to the bottom of the page to see how GET variables are retrieved using the class</p>
 
     <div>
-        <?php $form->formStart($_SERVER['PHP_SELF'].'#form_output', 'get'); ?>
+        <?php $form->formStart($_SERVER['PHP_SELF'] . '#form_output', 'get'); ?>
 
         <?php $form->hidden('get_submitted', '1'); ?>
 
@@ -230,8 +236,9 @@ if (!isset($_COOKIE['getPassed_cookie_test'])) {
 
 
     <?php if ($form->getPassed('post_submitted') || $form->getPassed('get_submitted')) { ?>
-        
+
         <div id="form_output"></div>
+        <br><br><br>
 
         <?php if ($form->getPassed('post_submitted')) { ?>
             <h2>POST form submitted</h2>
@@ -305,7 +312,7 @@ if (!isset($_COOKIE['getPassed_cookie_test'])) {
                 <td>retrieve tags_test with <b>no-strip-tags</b> flag</td>
                 <td>$form->getPassed('tags_test', 'no-strip-tags');</td>
                 <td><?php var_dump($form->getPassed('tags_test', 'no-strip-tags')); ?></td>
-                <td>tags are retained. note that tags are directly output if they are not escaped, so the text will appear bold and in italic in the browser</td>
+                <td>tags are retained. note that tags are directly output if they are not escaped, so the text will appear bold and italic in the browser</td>
             </tr>
 
             <tr>
