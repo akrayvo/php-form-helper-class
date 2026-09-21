@@ -33,7 +33,19 @@ $sports = array(
     <h1>HTML Form Example - Basic</h1>
     <div><a href="./">&laquo; back to All Examples</a></div><br><br>
 
+    <?php
+    if (!empty($_POST)) {
+        // form can be processed here
+        echo "<div><b>Form submitted</b>";
+        echo "<pre>";
+        var_dump($_POST); 
+        echo "</pre></div><br>";
+    } 
+    ?>
+
     <?php $form->formStart(); ?>
+
+    <?php $form->hidden('date_loaded', date('h:i:sA')); ?>
 
     <div><label>Name</label></div>
     <?php $form->text('name', $name); ?><br><br>
@@ -44,7 +56,7 @@ $sports = array(
     <div><label>Comments</label></div>
     <?php $form->textarea('comments', $comments); ?><br><br>
 
-    <?php $form->submit('Save Info'); ?>
+    <?php $form->button('Save Info'); ?>
 
     <?php $form->formEnd(); ?>
 

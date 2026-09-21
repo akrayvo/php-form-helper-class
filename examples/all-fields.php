@@ -66,9 +66,9 @@ $favoriteUrl = $form->getPassed('favoriteUrl');
     <?php
 
 	if (!empty($_GET)) {
-		echo '<br><br><br><div><b>Passed GET Variables</b><pre>';
+		echo '<div><b>Passed GET Variables</b><pre>';
 		var_dump($_GET);
-		echo '</pre>';
+		echo '</pre><br><br>';
 	}
 
     // note that this button is outside of the form.

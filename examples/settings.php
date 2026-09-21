@@ -1,7 +1,7 @@
 <?php
 
 // include the class file
-require_once('../FormHelper.php');
+require_once('../FormHelper.class.php');
 
 $form = new FormHelper();
 
@@ -78,6 +78,7 @@ $form = new FormHelper();
         <li>true or false (boolean); default = <b>false</b></li>
     </ul>
 
+    
     <div class="section-label">addIdAttributeFromName is set to <b>false</b>. id is not passed. no id attribute will
         be on the tag.</div>
     <div>
