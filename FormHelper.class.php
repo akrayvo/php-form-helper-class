@@ -18,6 +18,8 @@ class FormHelper
         // automatically add an "id" attribute with the same value as "name"?
         // does not affect radio inputs because they can have 
         //      multiple elements with the same "name" attribute
+        // does not affect buttons because the class does not automatically add 
+        //      a name "attribute" to buttons
         // if false, id attributes can be added with the $moreAttributes parameter
         // if true, id attributes can be overridden with the $moreAttributes parameter
         // false: <input name="first_name">
@@ -27,7 +29,7 @@ class FormHelper
         // in a select (dropdown), use each option's display text as its value
         // if false, the passed options parameter should be an associative
         //      array: $options = array('blue'=>'Blue', 'light_green'=>'Light Green');
-        // if true, the passed options parameter should be an indexed (non-associative)
+        // if true, the passed options parameter can be an indexed (non-associative)
         //      array since the key is ignored: $options = array('Blue', 'Light Green');
         // false:  <option value="blue">Blue</option><option value="light_green">Light Green</option>
         // true:  <option value="Blue">Blue</option><option value="Light Green">Light Green</option>
@@ -45,7 +47,7 @@ class FormHelper
         // true: "Joe <b>Smith</b>" is converted to "Joe Smith"
         'passedStripTags' => true,
 
-        // converts non-standard characters in passed values
+        // converts non-standard (non-ASCII) characters in passed values
         // used in the getPassed() function
         // replaces characters with equivalents when possible, 
         //  otherwise replaces the character with a dash
@@ -53,15 +55,15 @@ class FormHelper
         // true: "© Déjà vu" is converted to "- Deja vu"
         'passedConvertToStandardCharacters' => false,
 
-        // return NULL when variable is not available (not set or invalid)
+        // when retrieving a passed value, return NULL when variable is not available (not set or invalid)
         // by default, when a variable is not set, the return value is "" (empty string), 0, or an empty array depending on if a flag is set to return
-        //      as an int, float, or array. if this is set to true, null will be returned instead
+        //      as an int, float, or array. if returnNullIfUnavailable is set to true, null will be returned instead
         // will also return NULL when a variable doesn't match the settings. for instance, the 'array' flag is set, but the value is not an array
         // false: unset variable returns "" (empty string)
         // true:  unset variable returns NULL
         'returnNullIfUnavailable' => false,
 
-        // return the html elements as a string?
+        // return the HTML elements as a string?
         // if true, HTML is returned, echo is required
         // if false, HTML is directly output, echo is NOT required
         // false: $form->text('name', $name);
@@ -69,7 +71,7 @@ class FormHelper
         // true:  $html = $form->text('name', $name); echo $html;
         'returnHtml' => false,
 
-        // output html as XHTML-style syntax?
+        // output HTML as XHTML-style syntax?
         // closes self-closing elements and boolean attributes (selected, readonly, etc)
         //      will have values that match the attribute
         // false: <input type="text" name="name" readonly>

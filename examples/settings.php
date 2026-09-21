@@ -72,6 +72,7 @@ $form = new FormHelper();
     <ul>
         <li>automatically add an "id" attribute with the same value as "name"?</li>
         <li>does not affect radio inputs because they can have multiple elements with the same "name" attribute</li>
+        <li>does not affect buttons because the class does not automatically add a name "attribute" to buttons</li>
         <li>if false, id attributes can be added with the $moreAttributes parameter</li>
         <li>if true, id attributes can be overridden with the $moreAttributes parameter</li>
         <li>true or false (boolean); default = <b>false</b></li>
@@ -127,13 +128,13 @@ $form = new FormHelper();
         <li>in a select (dropdown), use each option's display text as its value</li>
         <li>if false, the passed options parameter should be an associative
             array: $options = array('blue'=>'Blue', 'light_green'=>'Light Green');</li>
-        <li>if true, the passed options parameter should be an indexed (non-associative)
+        <li>if true, the passed options parameter can be an indexed (non-associative)
             array since the key is ignored: $options = array('Blue', 'Light Green');</li>
         <li>true or false (boolean); default = <b>false</b></li>
     </ul>
     <?php
     // set data for both dropdown menus (select)
-    $selectOptions = array('' => '-no answer-', 'day' => 'Daytime', 'night' => 'Nighttime');
+    $selectOptions = array('' => '-no answer-', 'baseball' => 'Daytime', 'night' => 'Nighttime');
     ?>
     <div class="section-label">selectOptionValueEqualsDisplayText is set to <b>false</b>. Option values will be array item keys.</div>
     <div>
@@ -236,7 +237,7 @@ $form = new FormHelper();
 
     <h2>passedConvertToStandardCharacters</h2>
     <ul>
-        <li>converts non-standard characters in passed values</li>
+        <li>converts non-standard (non-ASCII) characters in passed values</li>
         <li>used in the getPassed() function</li>
         <li>replaces characters with equivalents when possible, otherwise replaces the character with a dash</li>
         <li>true or false (boolean); default = <b>false</b></li>
@@ -282,9 +283,10 @@ $form = new FormHelper();
 
     <h2>returnNullIfUnavailable</h2>
     <ul>
-        <li>return NULL when variable is not available (not set or invalid)</li>
+        <li>when retrieving a passed value, return NULL when variable is not available (not set or invalid)</li>
+		<li>used in the getPassed() function</li>
         <li>by default, when a variable is not set, the return value is "" (empty string), 0, or an empty array depending on if a flag is set to return
-              as an int, float, or array. if this is set to true, null will be returned instead</li>
+              as an int, float, or array. if returnNullIfUnavailable is set to true, null will be returned instead</li>
         <li>will also return NULL when a variable doesn't match the settings. for instance, the 'array' flag is set, but the value is not an array</li>
         <li>true or false (boolean); default = <b>false</b></li>
     </ul>
@@ -310,7 +312,7 @@ $form = new FormHelper();
         echo "\n<!-- class output: -->\n";
         $value = $form->getPassed('variable_is_not_set');
         var_dump($value);
-        // NULL
+        // output: NULL
         echo "\n\n";
         ?>
     </div>
@@ -323,7 +325,7 @@ $form = new FormHelper();
 
     <h2>returnHtml</h2>
     <ul>
-        <li>return the html elements as a string?</li>
+        <li>return the HTML elements as a string?</li>
         <li>true or false (boolean); default = <b>false</b></li>
     </ul>
 
@@ -369,7 +371,7 @@ $form = new FormHelper();
 
     <h2>xhtmlStyleOutput</h2>
     <ul>
-        <li>output html as XHTML-style syntax?</li>
+        <li>output HTML as XHTML-style syntax?</li>
         <li>closes self-closing elements and boolean attributes (selected, readonly, etc)
             will have values that match the attribute</li>
         <li>true or false (boolean); default = <b>false</b></li>

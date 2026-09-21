@@ -27,7 +27,7 @@
 
     // get passed values. set to empty string ("") if not set. strip tags and trim
     $full_name1 = $form->getPassed('full_name1');
-    $color1 = $form->getPassed('color1');
+    $sport1 = $form->getPassed('sport1');
     $comments1 = $form->getPassed('comments1');
     $form_load_time1 = $form->getPassed('form_load_time1');
 
@@ -50,10 +50,10 @@
     <div>Full Name</div>
     <?php $form->text('full_name1', $full_name1); ?><br><br>
 
-    <div>Favorite Color</div>
+    <div>Favorite Sport</div>
     <?php 
-        $colors = array('', 'red', 'green', 'blue', 'red & blue');
-        $form->select('color1', $colors, $color1);
+        $sports = array('', 'Baseball & Softball', 'Basketball', 'Football');
+        $form->select('sport1', $sports, $sport1);
     ?><br><br>
 
     <div>Comments</div>

@@ -5,6 +5,8 @@ A simple class to display HTML form elements using PHP.
 
 It takes care of the HTML syntax and encoding when generating form elements. It does **not** handle all HTML (labels, line breaks, etc.), validation, or data processing.
 
+Supports PHP 5.1 through current PHP versions. **PHP 5.1 compatibility is maintained intentionally; this does not indicate that the project is outdated or limited to older PHP versions**.
+
 ## Requirements
 * PHP >= 5.1
 
@@ -22,50 +24,46 @@ require_once('../FormHelper.class.php');
 // initialize class
 $form = new FormHelper();
 
-// get the value passed to the page. check both $_POST and $_GET
+// get the value passed to the page. check both $_POST and $_GET.
 $name = $form->getPassed('name');
+$sport = $form->getPassed('sport');
+$comments = $form->getPassed('comments');
 
-// hard-coded options for a select (dropdown menu) field
+// hard-coded options for select (dropdown menu) field
 // in actual usage, this data could also come from a database or data file
-$colors = array(
-    '' => '- select a color -',
-    'blue' => 'Blue',
-    'green' => 'Green',
-    'lightBlue' => 'Light Blue',
-    'red' => 'Red');
+$sports = array(
+    '' => '- select a sport -',
+    'baseball' => 'Baseball',
+    'basketball' => 'basketball',
+    'football' => 'Football',
+    'soccer' => 'Soccer (European Football)'  
+);
+
+// <form>
+$form->formStart();
+
+<div><label>Name</label></div>
+// <input type="text">
+<?php $form->text('name', $name); ?><br><br>
+
+// <input type="text">
+<div><label>Favorite Sport</label></div>
+// <select>
+<?php $form->select('sport', $sports, $sport); ?><br><br>
+
+<div><label>Comments</label></div>
+// <textarea>
+<?php $form->textarea('comments', $comments); ?><br><br>
+
+<?php 
+// <button>
+$form->button('Save Info');
 ?>
 
 <?php 
-// start the form <form>
-$form->formStart(); 
+// </form>
+$form->formEnd(); 
 ?>
-
-    <div><label>Name</label></div>    
-    <?php
-    // text input <input type="text">
-    $form->text('name', $name);
-    ?><br><br>
-    
-    <div><label>Favorite Color</label></div>
-    <?php 
-    // select (dropdown) with options <select><option>
-    $form->select('colors', $colors);
-    ?><br><br>
-    
-    <div><label>Comments</label></div>
-    <?php 
-    // textarea (large text input) <textarea>
-    $form->textarea('comments');
-    ?><br><br>
-    
-    <?php 
-    // submit button <input type="submit">
-    $form->submit('Save Info');
-    ?>
-
-<?php 
-// end the form </form>
-$form->formEnd(); ?>
 ```
 Generated HTML
 ```
@@ -73,8 +71,8 @@ Generated HTML
     <div><label>Name</label></div>    
     <input type="text" name="name" value=""><br><br>
     
-    <div><label>Favorite Color</label></div>
-    <select name="colors"><option value="">- select a color -</option><option value="blue">Blue</option><option value="green">Green</option><option value="lightBlue">Light Blue</option><option value="red">Red</option></select><br><br>
+    <div><label>Favorite Sport</label></div>
+    <select name="sport"><option value="">- select a sport -</option><option value="baseball">Baseball</option><option value="basketball">Basketball</option><option value="football">Football</option><option value="soccer">Soccer (European Football)</option></select><br><br>
     
     <div><label>Comments</label></div>
     <textarea name="comments"></textarea><br><br>
@@ -125,10 +123,10 @@ $form->formEnd();
 
 without class
 ```
-<input type="text" name="full_name" id="full_name" value="<?php echo htmlspecialchars($full_name); ?>" placeholder="Full Name">
+<input type="text" name="full_name" value="<?php echo htmlspecialchars($full_name); ?>" placeholder="Full Name">
 ```
 
-with class - if doAddIdAttributeFromName is set to true - $form->setDoAddIdAttributeFromName(true);
+with class
 ```
 <?php $form->text("full_name", $full_name, array("placeholder"=>"Full Name")); ?>
 ```
@@ -137,19 +135,24 @@ with class - if doAddIdAttributeFromName is set to true - $form->setDoAddIdAttri
 
 without class
 ```
-<select name="color">
-    <option value="" <?php if ($color == "") { echo "selected"; } ?>></option>
-    <option value="red" <?php if ($color == "red") { echo "selected"; } ?>>red</option>
-    <option value="blue" <?php if ($color == "blue") { echo "selected"; } ?>>blue</option>
-    <option value="red &amp; blue" <?php if ($color == "red & blue") { echo "selected"; } ?>>red &amp; blue</option>
+<select name="sport">
+    <option value="" <?php if ($sport == "") { echo "selected"; } ?>>- select a sport -</option>
+    <option value="baseball" <?php if ($sport == "baseball") { echo "selected"; } ?>>Baseball &amp; Softball</option>
+    <option value="football" <?php if ($sport == "football") { echo "selected"; } ?>>Football</option>
+    <option value="soccer" <?php if ($sport == "soccer") { echo "selected"; } ?>>Soccer (European Football)</option>
 </select>
 ```
 
 with class
 ```
 <?php
-$colors = array(""=>"", "red"=>"red", "blue"=>"blue", "red & blue"=>"red & blue");
-$form->select('color', $colors, $color);
+$sports = array(
+    "- select a sport -" => "", 
+    "baseball"=>"Baseball & Softball", 
+    "football"=>"Football", 
+    "soccer"=>"Soccer (European Football)"
+);
+$form->select('sport', $sports, $sport);
 ?>
 ```
 ### Checkbox
@@ -168,104 +171,174 @@ $form->checkbox('is_checked', $is_checked);
 
 ## Settings
 
-### private $doAddIdAttributeFromName = false;
-* automatically add an `id` attribute with the same value as the `name` attribute
-* does not affect radio inputs because they can have multiple elements with the same name attribute
-* does not affect buttons because the button() function does not have a name parameter
-* if set to false, `id` can be added with the `$moreAttributes` parameter
-* if set to true, `id` can be overridden with the `$moreAttributes` parameter 
+all settings are boolean (true or false) and can be set using the updateSetting function
 ```
-// $doAddIdAttributeFromName = false | parameter not passed, no id attribute
-$form->setDoAddIdAttributeFromName(false);
-$form->text('first_name');
-// <input type="text" name="first_name" value="">
-
-// $doAddIdAttributeFromName = false | parameter passed, id set
-$form->setDoAddIdAttributeFromName(false);
-$form->text("first_name", "", array("id"=>"first_name"));
-// <input type="text" name="first_name" value="" id="first_name">
-
-// $doAddIdAttributeFromName = true | id automatically added
-$form->setDoAddIdAttributeFromName(true);
-$form->text("first_name");
-// <input type="text" name="first_name" value="" id="first_name">
-
-// $doAddIdAttributeFromName = true | auto id overridden by passed parameter
-$form->setDoAddIdAttributeFromName(true);
-$moreAttributes = array('id'=>'f_name');
-$form->text('first_name', '', $moreAttributes);
-// <input type="text" name="first_name" value="" id="f_name">
+<?php
+$form = new FormHelper();
+$form->updateSetting('addIdAttributeFromName', true);
+$form->updateSetting('passedStripTags', false);
+?>
 ```
 
-### private $doReturnHtml = false;
-* return the HTML elements as a string
-* if false, output is output directly (no echo required commend)
-```
-// $doReturnHtml = false | echo is not required
-$form->setDoReturnHtml(false);
-$form->text("first_name");
-// <input type="text" name="first_name" value="">
+### exitProgramOnFailure
+* end program on settings/configuration error?
+* helpful for development, should be false in production
+* default = false
 
-// $doReturnHtml = true | echo is required
-$form->setDoReturnHtml(true);
-$html = $form->text("first_name");
-// (outputs nothing)
-echo $html;
-// <input type="text" name="first_name" value="">
-```
-     
-### private $isXhtmlStyle = false;
-* output XHTML-style HTML
-* use a closing slash on HTML tags that do not require a closing tag, ex: `<input type="text" name="name">` vs `<input type="text" name="name" />`
-* add an attribute name for attributes that do not require them, ex: `<button disabled>Submit</button>` vs. `<button disabled="disabled">Submit</button>` vs. 
-* note that this should generally be false, but can be set to true for consistency with existing code 
-```
-// $isXhtmlStyle = false
-$form->setIsXhtmlStyle(false);
-$form->text('first_name', '', ['readonly']);
-// <input type="text" name="first_name" value="" readonly>
 
-// $isXhtmlStyle = true
-$form->setIsXhtmlStyle(true);
-$form->text('first_name', '', ['readonly']);
-// <input type="text" name="first_name" value="" readonly="readonly" />
+### addIdAttributeFromName
+* automatically add an "id" attribute with the same value as "name"?
+* does not affect radio inputs because they can have multiple elements with the same "name" attribute
+* does not affect buttons because the class does not automatically add a name "attribute" to buttons
+* default = false
+
+```
+// addIdAttributeFromName = false
+// trying to retrieve a passed variable with invalid parameters (both POST and GET)
+$form->updateSetting('exitProgramOnFailure', false);
+$name = $form->getPassed('first_name', array('post','get'));
+// despite error, program will continue with no output error message
+
+// addIdAttributeFromName = true
+// trying to retrieve a passed variable with invalid parameters (both POST and GET)
+$form->updateSetting('exitProgramOnFailure', true);
+$name = $form->getPassed('first_name', array('post','get'));
+// will output an error message and end the program
 ```
 
-### private $doPassedStringCleanup = true;
-* string cleanup of passed variables
-* removes HTML tags (strip_tags)
-* strips whitespace from the beginning and end of a string (trim)
-* used in `getPost()`, `getGet()`, and `getPassed()` functions
-```
-// passed from form: $first_name = "<b>Joe</b>"
-
-$form->setDoPassedStringCleanup(true);
-$first_name = $form->getPassed('first_name');
-$form->text('first_name', $first_name);
-// <input type="text" name="first_name" value="Joe">
-
-$form->setDoPassedStringCleanup(false);
-$first_name = $form->getPassed('first_name');
-$form->text('first_name', $first_name);
-// (note that the value is HTML encoded)
-// <input type="text" name="first_name" value="&lt;b&gt;Joe&lt;/b&gt;">
-```
-
-### private $doSelectOptionValueEqualsText = false;
-* when an array of data is passed for the options of a dropdown menu (select), this determines if the value for each option is the array item key or the array item value (same as the display)
-* if set, `select` `option` `value` and display text will both be set to the options array item value, so `[2=>'a', => 3=>'b']` will output `<option value="a">a</option><option value="b">b</option>`
-* if NOT set, `select` `option` `value` will be the array key and the display text will be the array value, so `[2=>'a', => 3=>'b']` will output `<option value="2">a</option><option value="3">b</option>`
+### selectOptionValueEqualsDisplayText
+* in a select (dropdown), use each option's display text as its value
+* if false, the passed options parameter should be an associative array: $options = array('blue'=>'Blue', 'light_green'=>'Light Green');
+* if true, the passed options parameter can be an indexed (non-associative) array since the key is ignored: $options = array('Blue', 'Light Green');
+* default = false
 ```
 $options = array('NY'=>'New York', 'OH'=>'Ohio');
 
-$form->setDoSelectOptionValueEqualsText(false);
+// selectOptionValueEqualsDisplayText = false
+$form->updateSetting('selectOptionValueEqualsDisplayText', false);
 $form->select('state', $options);
 // <select name="state"><option value="NY">New York</option><option value="OH">Ohio</option></select>
 
-$form->setDoSelectOptionValueEqualsText(true);
+$form->updateSetting('selectOptionValueEqualsDisplayText', true);
 $form->select('state', $options);
 // <select name="state"><option value="New York">New York</option><option value="Ohio">Ohio</option></select>
 ```
+
+### passedTrim
+* trim whitespace from the beginning and end of passed values
+* used in the getPassed() function
+* default = true
+```
+// my_text = "  My Text  " was passed from form
+
+// passedTrim = false | beginning and end whitespace will be retained
+$form->updateSetting('passedTrim', false);
+var_dump($form->getPassed("my_text"));
+// output string(11) "   My Text   "
+
+// passedTrim = true | beginning and end whitespace will be removed
+$form->updateSetting('passedTrim', true);
+var_dump($form->getPassed("my_text"));
+// output string(7) "My Text"
+```
+
+
+### passedStripTags
+* remove HTML tags and script/style blocks from a string
+* used in the getPassed() function
+* default = true
+```
+// my_text = "<b><i>My Text</i></b>" was passed from form
+
+// passedStripTags = false | HTML tags will be retained
+$form->updateSetting('passedStripTags', false);
+var_dump($form->getPassed("my_text"));
+// output string(21) "<b><i>My Text</i></b>"
+
+// passedStripTags = true | HTML tags will be removed
+$form->updateSetting('passedStripTags', true);
+var_dump($form->getPassed("my_text"));
+// output string(7) "My Text"
+```
+
+
+### passedConvertToStandardCharacters
+* converts non-standard (non-ASCII) characters in passed values
+* used in the getPassed() function
+* replaces characters with equivalents when possible, otherwise replaces the character with a dash
+* default = false
+```
+// my_text = "Déjà Vu" was passed from form
+
+// passedConvertToStandardCharacters = false | non-standard will be retained
+$form->updateSetting('passedConvertToStandardCharacters', false);
+var_dump($form->getPassed("my_text"));
+// output string(9) "Déjà Vu"
+
+// passedConvertToStandardCharacters = true | non-standard will be replaced
+$form->updateSetting('passedConvertToStandardCharacters', true);
+var_dump($form->getPassed("my_text"));
+// output string(7) "Deja Vu"
+```
+
+
+### returnNullIfUnavailable
+* when retrieving a passed value, return NULL when variable is not available (not set or invalid)
+* used in the getPassed() function
+* by default, when a variable is not set, the return value is "" (empty string), 0, or an empty array depending on if a flag is set to return as an int, float, or array. if returnNullIfUnavailable is set to true, null will be returned instead
+* will also return NULL when a variable doesn't match the settings. for instance, the 'array' flag is set, but the value is not an array
+* default = false
+```
+// no POST or GET data passed
+
+// returnNullIfUnavailable = false
+$form->updateSetting('returnNullIfUnavailable', false);
+$value = $form->getPassed('variable_is_not_set');
+var_dump($value);
+// output: string(0) ""
+
+// returnNullIfUnavailable = true
+$form->updateSetting('returnNullIfUnavailable', true);
+$value = $form->getPassed('variable_is_not_set');
+var_dump($value);
+// output: NULL
+```
+
+
+### returnHtml
+* return the HTML elements as a string?
+* default = false
+
+```
+// returnHtml = false | no echo is required to display output
+$form->updateSetting('returnHtml', false);
+echo $form->text("first_name");
+// output: <input type="text" name="first_name" value="">
+
+// returnHtml = true | echo is required to display output
+$form->updateSetting('returnHtml', true);
+echo $form->text("first_name");
+// output: <input type="text" name="first_name" value="">
+```
+
+     
+### xhtmlStyleOutput
+* output XHTML-style HTML
+* closes self-closing elements and boolean attributes (selected, readonly, etc) will have values that match the attribute
+* default = false
+
+```
+// xhtmlStyleOutput = false
+$form->updateSetting('xhtmlStyleOutput', false);
+$form->text('first_name', '', array('readonly'));
+// <input type="text" name="first_name" value="" readonly>
+
+// xhtmlStyleOutput = true
+$form->updateSetting('xhtmlStyleOutput', true);
+$form->text('first_name', '', array('readonly'));
+// <input type="text" name="first_name" value="" readonly="readonly" />
+```
+
 
 ## Using form tag attributes
 All form element functions include a `$moreAttributes` parameter. It takes an array of attributes with the $key as the attribute name and the value being the value.
@@ -283,22 +356,41 @@ HTML output
 <input type="text" name="name" value="" style="padding:20px" placeholder="Name" readonly>
 ```
 
+
+## Passing Variables
+
+Processing forms generally requires handling data passed from POST or GET. These functions check that passed data exists, get the value, manipulate it, and return it.
+
+* `getPassed($var, $flags = array())` - get variable passed through POST, GET, or COOKIE. by default will check POST and return the value if set, then check GET and return the value if set. a COOKIE value is only returned when the `cookie` flag is set 
+* `getPost($var, $flags = array())` - get variable passed through POST
+* `getGet($var, $flags = array())` - get variable passed through GET
+
+# Flags
+* `post` - retrieve the variable from POST only
+* `get` - retrieve the variable from GET only
+* `cookie` - retrieve the variable from COOKIE only. note that COOKIE values are retrievable since they can be processed along with form data. For instance when saving form data to a database or processing an email form, a COOKIE value can be checked to determine if the user is logged in and that info can be processed.
+* `int` - convert retrieved value to an integer
+* `float` - convert retrieved value to a float
+* `array` - process value as an array, can be used with int or float to process an array of integers or floats
+* `strip-tags`, `no-strip-tags` - override the "passedStripTags" setting. see setting for details
+* `trim`, `no-trim` - override the "passedTrim" setting. see setting for details
+* `convert`, `no-convert` - override the "passedConvertToStandardCharacters" setting. see setting for details
+
+# Usage
+
+* flags can be passed as an array or a string separated by commas or spaces. ex: `$flags = array('post', 'float');  or  $flags = "post float";  or   $flags = "post,float";`
+
 ## Functions
 
 ### Settings
-* `setDoAddIdAttributeFromName($value)` - set $doAddIdAttributeFromName
-* `setDoReturnHtml($value)` - set $doReturnHtml
-* `setIsXhtmlStyle($value)` - set $isXhtmlStyle
-* `setDoPassedStringCleanup($value)` - set $doPassedStringCleanup
-* `setDoSelectOptionValueEqualsText($value)` - set $doSelectOptionValueEqualsText
+* `updateSetting($setting, $value)` - set configuration variables
 ### String Manipulation
 * `htmlEscape($string)` - escape a string to display in HTML
-* `stringCleanup($string)` - strips HTML tags from a string
 ### Get Passed Data
-* `getPassed($var, $returnOnfail = '')` - retrieve a value from $_GET or $_POST
-* `getPost($var, $returnOnfail = '')` - retrieve a value from $_POST
-* `getGet($var, $returnOnfail = '')` - retrieve a value from $_GET
-### input elements &lt;input&gt;
+* `getPassed($var, $flags = array())` - retrieve a value from $_GET, $_POST, or $_COOKIE. default functionality is check $_POST, then check $_GET
+* `getPost($var, $flags = array())` - retrieve a value from $_POST
+* `getGet($var, $flags = array())` - retrieve a value from $_GET
+### input elements
 * `hidden($name, $value = '', $moreAttributes = array())` - `<input type="hidden">`
 * `text($name, $value = '', $moreAttributes = array())` - `<input type="text">`
 * `color($name, $value = '', $moreAttributes = array())` - `<input type="color">`
@@ -312,6 +404,7 @@ HTML output
 * `radio($name, $value, $selectedValue = '', $moreAttributes = array())` - `<input type="radio">`
 * `submit($value = '', $name = '',  $moreAttributes = array())` - `<input type="submit">`
 * `reset($value = '', $name = '',  $moreAttributes = array())` - `<input type="reset">`
+* `input($type, $name, $value = '', $moreAttributes = array())` - `<input>` (used for other HTML inputs: url, phone, etc)
 
 ### Other form elements
 * `formStart($action = '', $method = '', $moreAttributes = array())` - `<form>`
