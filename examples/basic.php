@@ -7,17 +7,16 @@ $form = new FormHelper();
 
 // get the value passed to the page. check both $_POST and $_GET
 $name = $form->getPassed('name');
-$color = $form->getPassed('color');
+$sport = $form->getPassed('sport');
 $comments = $form->getPassed('comments');
 
 // hard-coded options for select (dropdown menu) field
 // in actual usage, this data could also come from a database or data file
-$colors = array(
-    '' => '- select a color -',
-    'blue' => 'Blue',
-    'green' => 'Green',
-    'lightBlue' => 'Light Blue',
-    'red' => 'Red'
+$sports = array(
+    '' => '- select a sport -',
+    'baseball' => 'Baseball & Softball',
+    'basketball' => 'basketball',
+    'football' => 'Football'
 );
 
 ?><!DOCTYPE html>
@@ -39,8 +38,8 @@ $colors = array(
     <div><label>Name</label></div>
     <?php $form->text('name', $name); ?><br><br>
 
-    <div><label>Favorite Color</label></div>
-    <?php $form->select('color', $colors, $color); ?><br><br>
+    <div><label>Favorite Sport</label></div>
+    <?php $form->select('sport', $sports, $sport); ?><br><br>
 
     <div><label>Comments</label></div>
     <?php $form->textarea('comments', $comments); ?><br><br>
