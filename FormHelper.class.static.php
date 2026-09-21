@@ -8,7 +8,7 @@ class FormHelper
 {
     // Configuration
 
-    private $settings = array(
+    private static $settings = array(
         'exitProgramOnFailure' => false,
         'addIdAttributeFromName' => false,
         'selectOptionValueEqualsDisplayText' => false,
@@ -20,39 +20,36 @@ class FormHelper
         'xhtmlStyleOutput' => false
     );
 
-    public function updateSetting($setting, $value)
+    public static function updateSetting($setting, $value)
     {
-        if (!isset($this->settings[$setting])) {
-            $this->exitProgramError("updateSetting function received invalid setting: " . $setting);
-            return $this;
+        if (!isset(self::$settings[$setting])) {
+            self::exitProgramError("updateSetting function received invalid setting: " . $setting);
+            return;
         }
 
         if ($value) {
-            $this->settings[$setting] = true;
+            self::$settings[$setting] = true;
         } else {
-            $this->settings[$setting] = false;
+            self::$settings[$setting] = false;
         }
-        return $this;
     }
 
-    public function updateSettings($settings)
+    public static function updateSettings($settings)
     {
         if (!is_array($settings)) {
-            $this->exitProgramError("updateSettings was not passed an array");
-            return $this;
+            self::exitProgramError("updateSettings was not passed an array");
+            return;
         }
 
         foreach ($settings as $setting => $value) {
-            $this->updateSetting($setting, $value);
+            self::updateSetting($setting, $value);
         }
-
-        return $this;
     }
 
 
     // Form Container
 
-    public function formStart($action = '', $method = '', $moreAttributes = array())
+    public static function formStart($action = '', $method = '', $moreAttributes = array())
     {
         $attributes = array();
 
@@ -70,23 +67,23 @@ class FormHelper
         }
         $attributes['method'] = $method;
 
-        $attributes = $this->combineAttributes($attributes, $moreAttributes);
+        $attributes = self::combineAttributes($attributes, $moreAttributes);
 
-        $html = '<form' . $this->attributeArrayToString($attributes) . '>';
+        $html = '<form' . self::attributeArrayToString($attributes) . '>';
 
-        return $this->htmlOutputOrReturn($html);
+        return self::htmlOutputOrReturn($html);
     }
 
-    public function formEnd()
+    public static function formEnd()
     {
         $html = '</form>';
-        return $this->htmlOutputOrReturn($html);
+        return self::htmlOutputOrReturn($html);
     }
 
 
     // Generic Form Input
 
-    public function input($type, $name, $value = '', $moreAttributes = array())
+    public static function input($type, $name, $value = '', $moreAttributes = array())
     {
         $attributes = array(
             'type' => $type,
@@ -94,42 +91,42 @@ class FormHelper
             'value' => $value
         );
 
-        $attributes = $this->combineAttributes($attributes, $moreAttributes);
+        $attributes = self::combineAttributes($attributes, $moreAttributes);
 
         $closingSlash = '';
-        if (!empty($this->settings['xhtmlStyleOutput'])) {
+        if (!empty(self::$settings['xhtmlStyleOutput'])) {
             $closingSlash = ' /';
         }
 
-        $html = '<input' . $this->attributeArrayToString($attributes) . $closingSlash . '>';
+        $html = '<input' . self::attributeArrayToString($attributes) . $closingSlash . '>';
 
-        return $this->htmlOutputOrReturn($html);
+        return self::htmlOutputOrReturn($html);
     }
 
 
     // Inputs With Specific Types
 
-    public function text($name, $value = '', $moreAttributes = array())
+    public static function text($name, $value = '', $moreAttributes = array())
     {
-        return $this->input('text', $name, $value, $moreAttributes);
+        return self::input('text', $name, $value, $moreAttributes);
     }
 
-    public function password($name, $moreAttributes = array())
+    public static function password($name, $moreAttributes = array())
     {
-        return $this->input('password', $name, '', $moreAttributes);
+        return self::input('password', $name, '', $moreAttributes);
     }
 
-    public function email($name, $value = '', $moreAttributes = array())
+    public static function email($name, $value = '', $moreAttributes = array())
     {
-        return $this->input('email', $name, $value, $moreAttributes);
+        return self::input('email', $name, $value, $moreAttributes);
     }
 
-    public function tel($name, $value = '', $moreAttributes = array())
+    public static function tel($name, $value = '', $moreAttributes = array())
     {
-        return $this->input('tel', $name, $value, $moreAttributes);
+        return self::input('tel', $name, $value, $moreAttributes);
     }
 
-    public function date($name, $value = '', $moreAttributes = array())
+    public static function date($name, $value = '', $moreAttributes = array())
     {
         if (empty($value)) {
             $value = '';
@@ -143,16 +140,16 @@ class FormHelper
                 $value = date('Y-m-d', $unitTime);
             }
         }
-        return $this->input('date', $name, $value, $moreAttributes);
+        return self::input('date', $name, $value, $moreAttributes);
     }
 
-    public function color($name, $value = '', $moreAttributes = array())
+    public static function color($name, $value = '', $moreAttributes = array())
     {
-        $value = $this->returnValidHex($value);
-        return $this->input('color', $name, $value, $moreAttributes);
+        $value = self::returnValidHex($value);
+        return self::input('color', $name, $value, $moreAttributes);
     }
 
-    public function number($name, $value = '', $moreAttributes = array())
+    public static function number($name, $value = '', $moreAttributes = array())
     {
         if (is_string($value)) {
             if (strlen($value) > 0 && is_numeric($value)) {
@@ -164,10 +161,10 @@ class FormHelper
             }
         }
 
-        return $this->input('number', $name, $value, $moreAttributes);
+        return self::input('number', $name, $value, $moreAttributes);
     }
 
-    public function range($name, $min, $max, $value = '', $moreAttributes = array())
+    public static function range($name, $min, $max, $value = '', $moreAttributes = array())
     {
         $moreAttributes['min'] = intval($min);
         $moreAttributes['max'] = intval($max);
@@ -182,74 +179,74 @@ class FormHelper
             }
         }
 
-        return $this->input('range', $name, $value, $moreAttributes);
+        return self::input('range', $name, $value, $moreAttributes);
     }
 
-    public function checkbox($name, $isChecked = false, $value = 1, $moreAttributes = array())
+    public static function checkbox($name, $isChecked = false, $value = 1, $moreAttributes = array())
     {
         if (!empty($isChecked)) {
-            if ($this->settings['xhtmlStyleOutput']) {
+            if (self::$settings['xhtmlStyleOutput']) {
                 $moreAttributes['checked'] = 'checked';
             } else {
                 $moreAttributes[] = 'checked';
             }
         }
 
-        return $this->input('checkbox', $name, $value, $moreAttributes);
+        return self::input('checkbox', $name, $value, $moreAttributes);
     }
 
-    public function radio($name, $value, $selectedValue = null, $moreAttributes = array())
+    public static function radio($name, $value, $selectedValue = null, $moreAttributes = array())
     {
         if ($value !== null && $selectedValue !== null && $value == $selectedValue) {
-            if ($this->settings['xhtmlStyleOutput']) {
+            if (self::$settings['xhtmlStyleOutput']) {
                 $moreAttributes['checked'] = 'checked';
             } else {
                 $moreAttributes[] = 'checked';
             }
         }
 
-        return $this->input('radio', $name, $value, $moreAttributes);
+        return self::input('radio', $name, $value, $moreAttributes);
     }
 
-    public function hidden($name, $value = '', $moreAttributes = array())
+    public static function hidden($name, $value = '', $moreAttributes = array())
     {
-        return $this->input('hidden', $name, $value, $moreAttributes);
+        return self::input('hidden', $name, $value, $moreAttributes);
     }
 
 
     // Other Form Elements (non input) (textarea and select)
 
-    public function textarea($name, $value = '', $moreAttributes = array())
+    public static function textarea($name, $value = '', $moreAttributes = array())
     {
         $attributes = array('name' => $name);
 
-        $attributes = $this->combineAttributes($attributes, $moreAttributes);
+        $attributes = self::combineAttributes($attributes, $moreAttributes);
 
-        $html = '<textarea' . $this->attributeArrayToString($attributes) . '>' .
-            $this->htmlEscape($value) .
+        $html = '<textarea' . self::attributeArrayToString($attributes) . '>' .
+            self::htmlEscape($value) .
             '</textarea>';
 
-        return $this->htmlOutputOrReturn($html);
+        return self::htmlOutputOrReturn($html);
     }
 
-    public function select($name, $options, $value = null, $moreAttributes = array())
+    public static function select($name, $options, $value = null, $moreAttributes = array())
     {
         $attributes = array('name' => $name);
 
-        $attributes = $this->combineAttributes($attributes, $moreAttributes);
+        $attributes = self::combineAttributes($attributes, $moreAttributes);
 
-        $html = '<select' . $this->attributeArrayToString($attributes) . '>';
+        $html = '<select' . self::attributeArrayToString($attributes) . '>';
 
         foreach ($options as $optionValue => $display) {
             if (is_array($display)) {
                 $html .= '<optgroup ' .
-                    $this->attributeArrayToString(array('label' => $optionValue)) .
+                    self::attributeArrayToString(array('label' => $optionValue)) .
                     '>';
                 foreach ($display as $groupOptionValue => $groupOptionDisplay) {
-                    if ($this->settings['selectOptionValueEqualsDisplayText']) {
+                    if (self::$settings['selectOptionValueEqualsDisplayText']) {
                         $groupOptionValue = $groupOptionDisplay;
                     }
-                    $html .= $this->selectOption(
+                    $html .= self::selectOption(
                         $groupOptionDisplay,
                         $groupOptionValue,
                         $value
@@ -257,19 +254,19 @@ class FormHelper
                 }
                 $html .= '</optgroup>';
             } else {
-                if ($this->settings['selectOptionValueEqualsDisplayText']) {
+                if (self::$settings['selectOptionValueEqualsDisplayText']) {
                     $optionValue = $display;
                 }
-                $html .= $this->selectOption($display, $optionValue, $value);
+                $html .= self::selectOption($display, $optionValue, $value);
             }
         }
 
         $html .= '</select>';
 
-        return $this->htmlOutputOrReturn($html);
+        return self::htmlOutputOrReturn($html);
     }
 
-    public function selectByRecordSet(
+    public static function selectByRecordSet(
         $name,
         $records,
         $valueKey,
@@ -290,13 +287,13 @@ class FormHelper
             }
         }
 
-        return $this->select($name, $options, $value, $moreAttributes);
+        return self::select($name, $options, $value, $moreAttributes);
     }
 
 
     // Form Buttons
 
-    public function submit($value = '', $name = '',  $moreAttributes = array())
+    public static function submit($value = '', $name = '',  $moreAttributes = array())
     {
         // set default name, button input data is rarely processed, so
         //      the name can often use the default value
@@ -308,10 +305,10 @@ class FormHelper
             $value = 'Submit';
         }
 
-        return $this->input('submit', $name, $value, $moreAttributes);
+        return self::input('submit', $name, $value, $moreAttributes);
     }
 
-    public function reset($value = '', $name = '',  $moreAttributes = array())
+    public static function reset($value = '', $name = '',  $moreAttributes = array())
     {
         // set default name, button input data is rarely processed, so
         //      the name can often use the default value
@@ -323,33 +320,33 @@ class FormHelper
             $value = 'Reset';
         }
 
-        return $this->input('reset', $name, $value, $moreAttributes);
+        return self::input('reset', $name, $value, $moreAttributes);
     }
 
-    public function button($html = 'Submit', $moreAttributes = array())
+    public static function button($html = 'Submit', $moreAttributes = array())
     {
         // note that $html is not escaped. this allows images or other HTML inside of the button
-        $html = '<button' . $this->attributeArrayToString($moreAttributes) . '>' .
+        $html = '<button' . self::attributeArrayToString($moreAttributes) . '>' .
             $html .
             '</button>';
 
-        return $this->htmlOutputOrReturn($html);
+        return self::htmlOutputOrReturn($html);
     }
 
 
     // Request Passed Values (used in redisplaying a form with errors or form processing)
 
-    public function getPassed($var, $flags = array())
+    public static function getPassed($var, $flags = array())
     {
         if (empty($var)) {
-            $this->exitProgramError("no variable name passed to getPassed");
+            self::exitProgramError("no variable name passed to getPassed");
         }
 
-        $processedFlags = $this->processPassedFlags($flags);
-        return $this->getPassedInternal($var, $processedFlags);
+        $processedFlags = self::processPassedFlags($flags);
+        return self::getPassedInternal($var, $processedFlags);
     }
 
-    public function getPost($var, $flags = array())
+    public static function getPost($var, $flags = array())
     {
         if (is_string($flags)) {
             $flags .= ', post';
@@ -360,10 +357,10 @@ class FormHelper
                 $flags = array('post');
             }
         }
-        return $this->getPassed($var, $flags);
+        return self::getPassed($var, $flags);
     }
 
-    public function getGet($var, $flags = array())
+    public static function getGet($var, $flags = array())
     {
         if (is_string($flags)) {
             $flags .= ', get';
@@ -374,13 +371,13 @@ class FormHelper
                 $flags = array('get');
             }
         }
-        return $this->getPassed($var, $flags);
+        return self::getPassed($var, $flags);
     }
 
 
     // Public Helper Functions
 
-    public function htmlEscape($string)
+    public static function htmlEscape($string)
     {
         if (version_compare(PHP_VERSION, '5.2.3', '>=')) {
             // htmlspecialchars $encoding parameter add in PHP 5.2.3
@@ -390,7 +387,7 @@ class FormHelper
         return htmlspecialchars($string, ENT_QUOTES);
     }
 
-    public function convertToStandardCharacters($str)
+    public static function convertToStandardCharacters($str)
     {
         // common replacements
         $replace = array(
@@ -439,7 +436,7 @@ class FormHelper
         return $str;
     }
 
-    public function stripTags($str)
+    public static function stripTags($str)
     {
         // remove script and style blocks
         $str = preg_replace(
@@ -452,7 +449,7 @@ class FormHelper
         return strip_tags($str);
     }
 
-    public function returnValidHex($hex)
+    public static function returnValidHex($hex)
     {
         if (empty($hex)) {
             return '';
@@ -483,9 +480,9 @@ class FormHelper
 
     // Private Helper Functions (not available outside of the class)
 
-    private function htmlOutputOrReturn($html)
+    private static function htmlOutputOrReturn($html)
     {
-        if ($this->settings['returnHtml']) {
+        if (self::$settings['returnHtml']) {
             return $html;
         }
 
@@ -493,7 +490,7 @@ class FormHelper
         return '';
     }
 
-    private function attributeArrayToString($attributes)
+    private static function attributeArrayToString($attributes)
     {
         if (empty($attributes) || !is_array($attributes)) {
             return '';
@@ -507,7 +504,7 @@ class FormHelper
                 continue;
             }
 
-            $value = $this->htmlEscape($value);
+            $value = self::htmlEscape($value);
 
             if (is_int($name)) {
                 // numeric keys are treated as a non-associative array.
@@ -515,14 +512,14 @@ class FormHelper
 
                 if (!in_array($value, $addedAttributes)) {
                     $addedAttributes[] = $value;
-                    if ($this->settings['xhtmlStyleOutput']) {
+                    if (self::$settings['xhtmlStyleOutput']) {
                         $attributeString .= ' ' . $value . '="' . $value . '"';
                     } else {
                         $attributeString .= ' ' . $value;
                     }
                 }
             } else {
-                $name = $this->htmlEscape($name);
+                $name = self::htmlEscape($name);
                 if (!in_array($name, $addedAttributes)) {
                     $addedAttributes[] = $name;
                     $attributeString .= ' ' . $name . '="' . $value . '"';
@@ -533,9 +530,9 @@ class FormHelper
         return $attributeString;
     }
 
-    private function checkAddIdAttributeFromName($attributes)
+    private static function checkAddIdAttributeFromName($attributes)
     {
-        if (!$this->settings['addIdAttributeFromName']) {
+        if (!self::$settings['addIdAttributeFromName']) {
             // auto add id setting is off
             return false;
         }
@@ -560,7 +557,7 @@ class FormHelper
         return true;
     }
 
-    private function combineAttributes($mainAttributes, $moreAttributes = array())
+    private static function combineAttributes($mainAttributes, $moreAttributes = array())
     {
         $attributes = array();
 
@@ -588,7 +585,7 @@ class FormHelper
             }
         }
 
-        if ($this->checkAddIdAttributeFromName($attributes)) {
+        if (self::checkAddIdAttributeFromName($attributes)) {
             // add id attribute based on name
             // ex: <input type="text" name="last_name" id="last_name">
             $id = $attributes['name'];
@@ -604,12 +601,12 @@ class FormHelper
         return $attributes;
     }
 
-    private function selectOption($display, $value, $selectedValue)
+    private static function selectOption($display, $value, $selectedValue)
     {
         $attributes = array('value' => $value);
 
         if ($value !== null && $selectedValue !== null && $value == $selectedValue) {
-            if ($this->settings['xhtmlStyleOutput']) {
+            if (self::$settings['xhtmlStyleOutput']) {
                 $attributes['selected'] = 'selected';
             } else {
                 $attributes[] = 'selected';
@@ -617,31 +614,31 @@ class FormHelper
         }
 
         $html = '<option' .
-            $this->attributeArrayToString($attributes) .
+            self::attributeArrayToString($attributes) .
             '>' .
-            $this->htmlEscape($display) .
+            self::htmlEscape($display) .
             '</option>';
 
         return $html;
     }
 
-    private function exitProgramError($message = '')
+    private static function exitProgramError($message = '')
     {
-        if (!$this->settings['exitProgramOnFailure']) {
+        if (!self::$settings['exitProgramOnFailure']) {
             return;
         }
 
         // display message
         echo "\n<br><div>ERROR\n";
         if (!empty($message)) {
-            echo ": " . $this->htmlEscape($message);
+            echo ": " . self::htmlEscape($message);
         }
         echo "\n</div><br>\n";
 
         die();
     }
 
-    private function processPassedFlags($flags)
+    private static function processPassedFlags($flags)
     {
         if (empty($flags)) {
             return array();
@@ -649,7 +646,7 @@ class FormHelper
 
         if (!is_array($flags)) {
             if (!is_string($flags)) {
-                $this->exitProgramError("flags must be an array or string");
+                self::exitProgramError("flags must be an array or string");
                 return array();
             }
 
@@ -675,39 +672,39 @@ class FormHelper
             if (in_array($f, $validFlagAr)) {
                 $newFlags[$f] = true;
             } else {
-                $this->exitProgramError("invalid flag found: " . $f);
+                self::exitProgramError("invalid flag found: " . $f);
             }
         }
         $flags = $newFlags;
 
         if (!empty($flags['post']) && !empty($flags['get'])) {
-            $this->exitProgramError("incompatible flags passed: post and get");
+            self::exitProgramError("incompatible flags passed: post and get");
         }
         if (!empty($flags['post']) && !empty($flags['cookie'])) {
-            $this->exitProgramError("incompatible flags passed: post and cookie");
+            self::exitProgramError("incompatible flags passed: post and cookie");
         }
         if (!empty($flags['get']) && !empty($flags['cookie'])) {
-            $this->exitProgramError("incompatible flags passed: get and cookie");
+            self::exitProgramError("incompatible flags passed: get and cookie");
         }
         if (!empty($flags['int']) && !empty($flags['float'])) {
-            $this->exitProgramError("incompatible flags passed: int and float");
+            self::exitProgramError("incompatible flags passed: int and float");
         }
         if (!empty($flags['strip-tags']) && !empty($flags['no-strip-tags'])) {
-            $this->exitProgramError("incompatible flags passed: strip-tags and no-strip-tags");
+            self::exitProgramError("incompatible flags passed: strip-tags and no-strip-tags");
         }
         if (!empty($flags['trim']) && !empty($flags['no-trim'])) {
-            $this->exitProgramError("incompatible flags passed: trim and no-trim");
+            self::exitProgramError("incompatible flags passed: trim and no-trim");
         }
         if (!empty($flags['convert']) && !empty($flags['no-convert'])) {
-            $this->exitProgramError("incompatible flags passed: convert and no-convert");
+            self::exitProgramError("incompatible flags passed: convert and no-convert");
         }
 
         return $newFlags;
     }
 
-    private function getReturnOnFail($flags = array())
+    private static function getReturnOnFail($flags = array())
     {
-        if ($this->settings['returnNullIfUnavailable']) {
+        if (self::$settings['returnNullIfUnavailable']) {
             return null;
         }
         if (!empty($flags['array'])) {
@@ -719,9 +716,9 @@ class FormHelper
         return "";
     }
 
-    private function getPassedInternal($var, $flags = array())
+    private static function getPassedInternal($var, $flags = array())
     {
-        $returnOnFail = $this->getReturnOnFail($flags);
+        $returnOnFail = self::getReturnOnFail($flags);
 
         if (!empty($flags['post'])) {
             if (!isset($_POST[$var])) {
@@ -746,16 +743,16 @@ class FormHelper
             return $returnOnFail;
         }
 
-        return $this->getPassedInternalValue($val, $flags);
+        return self::getPassedInternalValue($val, $flags);
     }
 
-    private function getPassedInternalValue($val, $flags)
+    private static function getPassedInternalValue($val, $flags)
     {
-        $returnOnFail = $this->getReturnOnFail($flags);
+        $returnOnFail = self::getReturnOnFail($flags);
 
         if (!empty($flags['array'])) {
             if (is_array($val)) {
-                return $this->getPassedInternalArray($val, $flags);
+                return self::getPassedInternalArray($val, $flags);
             }
             return $returnOnFail;
         }
@@ -786,23 +783,23 @@ class FormHelper
 
         if (!empty($flags['no-convert'])) {
             // no-convert flag passed - do nothing
-        } elseif (empty($flags['convert']) && !$this->settings['passedConvertToStandardCharacters']) {
+        } elseif (empty($flags['convert']) && !self::$settings['passedConvertToStandardCharacters']) {
             // convert flag not passed and passedConvertToStandardCharacters is false - do nothing
         } else {
-            $val = $this->convertToStandardCharacters($val, $flags);
+            $val = self::convertToStandardCharacters($val, $flags);
         }
 
         if (!empty($flags['no-strip-tags'])) {
             // no-strip-tags flag passed - do nothing
-        } elseif (empty($flags['strip-tags']) && !$this->settings['passedStripTags']) {
+        } elseif (empty($flags['strip-tags']) && !self::$settings['passedStripTags']) {
             // strip-tags flag not passed and passedStripTags is false - do nothing
         } else {
-            $val = $this->stripTags($val);
+            $val = self::stripTags($val);
         }
 
         if (!empty($flags['no-trim'])) {
             // no-trim flag passed - do nothing
-        } elseif (empty($flags['trim']) && !$this->settings['passedTrim']) {
+        } elseif (empty($flags['trim']) && !self::$settings['passedTrim']) {
             // trim flag not passed and passedTrim is false - do nothing
         } else {
             $val = trim($val);
@@ -811,10 +808,10 @@ class FormHelper
         return $val;
     }
 
-    private function getPassedInternalArray($array, $flags)
+    private static function getPassedInternalArray($array, $flags)
     {
         if (!is_array($array)) {
-            return $this->getReturnOnFail($flags);
+            return self::getReturnOnFail($flags);
         }
 
         $flagsNoArray = $flags;
@@ -825,9 +822,9 @@ class FormHelper
         $return = array();
         foreach ($array as $k => $v) {
             if (is_array($v)) {
-                $return[$k] = $this->getPassedInternalArray($v, $flags);
+                $return[$k] = self::getPassedInternalArray($v, $flags);
             } else {
-                $return[$k] = $this->getPassedInternalValue($v, $flagsNoArray);
+                $return[$k] = self::getPassedInternalValue($v, $flagsNoArray);
             }
         }
         return $return;

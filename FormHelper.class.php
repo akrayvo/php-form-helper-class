@@ -702,7 +702,7 @@ class FormHelper
             $str
         );
 
-        // trim html tags and return
+        // remove html tags and return
         return strip_tags($str);
     }
 
@@ -1130,7 +1130,7 @@ class FormHelper
     private function getPassedInternalArray($array, $flags)
     {
         if (!is_array($array)) {
-            return array();
+            return $this->getReturnOnFail($flags);
         }
 
         $flagsNoArray = $flags;
