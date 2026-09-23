@@ -40,7 +40,7 @@ $favoriteUrl = $form->getPassed('favoriteUrl');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HTML Form Example - All Field Types</title>
-    <link rel="stylesheet" href="./style.css?x=2">
+    <link rel="stylesheet" href="./style.css">
 
     <!-- optional JavaScript -->
     <script>
