@@ -14,8 +14,14 @@ body {
 
 body,
 h1,
-h2
-input {
+h2,
+h3,
+input,
+td, 
+td,
+textarea,
+select,
+option {
   font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
   font-size: 14px;
 }

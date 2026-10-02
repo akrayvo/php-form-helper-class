@@ -25,12 +25,12 @@ $sports = array(
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HTML Form Example - Basic</title>
-    <link rel="stylesheet" href="./style.css?x=2">
+    <link rel="stylesheet" href="./style.css">
 </head>
 
 <body>
     <h1>HTML Form Example - Basic</h1>
-    <div><a href="./">&laquo; back to All Examples</a></div><br><br>
+    <div><a href="./">&laquo; back to All Examples</a></div><br>
 
     <p>All functions and settings in the static version of the class are the same as the normal version.</p>
 
