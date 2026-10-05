@@ -166,7 +166,7 @@ $form = new FormHelper();
     <h2>passedTrim</h2>
     <ul>
         <li>trim whitespace from the beginning and end of passed values</li>
-        <li>used in the getPassed() function</li>
+        <li>used in the passed() function</li>
         <li>true or false (boolean); default = <b>true</b></li>
     </ul>
 
@@ -177,7 +177,7 @@ $form = new FormHelper();
         echo "\n<!-- class output: -->\n";
         $form->updateSetting('passedTrim', false);
         echo "set to <b>false</b>: ";
-        var_dump($form->getPassed("trim_test"));
+        var_dump($form->passed("trim_test"));
         // output if trim_test with value of " My Text " was passed: string(9) " My Text " 
         echo "\n\n";
         ?>
@@ -188,7 +188,7 @@ $form = new FormHelper();
         echo "\n<!-- class output: -->\n";
         $form->updateSetting('passedTrim', true);
         echo "set to <b>true</b>: ";
-        var_dump($form->getPassed("trim_test"));
+        var_dump($form->passed("trim_test"));
         echo "\n\n";
         // output if trim_test with value of " My Text " was passed: string(7) "My Text" 
         ?>
@@ -203,7 +203,7 @@ $form = new FormHelper();
     <h2>passedStripTags</h2>
     <ul>
         <li>remove HTML tags and script/style blocks from passed values</li>
-        <li>used in the getPassed() function</li>
+        <li>used in the passed() function</li>
         <li>true or false (boolean); default = <b>true</b></li>
     </ul>
 
@@ -214,7 +214,7 @@ $form = new FormHelper();
         echo "\n\n<!-- class output: -->\n";
 
         $form->updateSetting('passedStripTags', false);
-        echo $form->getPassed("strip_tags_test");
+        echo $form->passed("strip_tags_test");
         // output if strip_tags_test with value of "<i><b>My Text</b></i>" was passed: <i><b>My Text</b></i>
         echo "\n\n";
         ?>
@@ -225,7 +225,7 @@ $form = new FormHelper();
         echo "set to <b>true</b>: ";
         echo "\n\n<!-- class output: -->\n";
         $form->updateSetting('passedStripTags', true);
-        echo $form->getPassed("strip_tags_test");
+        echo $form->passed("strip_tags_test");
         // output if strip_tags_test with value of "<i><b>My Text</b></i>" was passed: My Text
         echo "\n\n";
         ?>
@@ -239,7 +239,7 @@ $form = new FormHelper();
     <h2>passedConvertToStandardCharacters</h2>
     <ul>
         <li>converts non-standard (non-ASCII) characters in passed values</li>
-        <li>used in the getPassed() function</li>
+        <li>used in the passed() function</li>
         <li>replaces characters with equivalents when possible, otherwise replaces the character with a dash</li>
         <li>true or false (boolean); default = <b>false</b></li>
     </ul>
@@ -261,7 +261,7 @@ $form = new FormHelper();
         $form->updateSetting('passedConvertToStandardCharacters', false);
         echo "set to <b>false</b>: ";
         echo "\n\n<!-- class output: -->\n";
-        echo $form->getPassed("convert_test");
+        echo $form->passed("convert_test");
         // output of convert_test with string containing non-standard characters: (maintain special characters)
         echo "\n\n";
         ?>
@@ -272,7 +272,7 @@ $form = new FormHelper();
         $form->updateSetting('passedConvertToStandardCharacters', true);
         echo "set to <b>true</b>: ";
         echo "\n\n<!-- class output: -->\n";
-        echo $form->getPassed("convert_test");
+        echo $form->passed("convert_test");
         // output of convert_test with string containing non-standard characters: (replace or remove special characters)
         echo "\n\n";
         ?>
@@ -285,7 +285,7 @@ $form = new FormHelper();
     <h2>returnNullIfUnavailable</h2>
     <ul>
         <li>when retrieving a passed value, return NULL when variable is not available (not set or invalid)</li>
-		<li>used in the getPassed() function</li>
+		<li>used in the passed() function</li>
         <li>by default, when a variable is not set, the return value is "" (empty string), 0, or an empty array depending on if a flag is set to return
               as an int, float, or array. if returnNullIfUnavailable is set to true, null will be returned instead</li>
         <li>will also return NULL when a variable doesn't match the settings. for instance, the 'array' flag is set, but the value is not an array</li>
@@ -298,7 +298,7 @@ $form = new FormHelper();
         $form->updateSetting('returnNullIfUnavailable', false);
         echo "set to <b>false</b>: ";
         echo "\n<!-- class output: -->\n";
-        $value = $form->getPassed('variable_is_not_set');
+        $value = $form->passed('variable_is_not_set');
         var_dump($value);
         // output: string(0) ""
         echo "\n\n";
@@ -311,7 +311,7 @@ $form = new FormHelper();
         $form->updateSetting('returnNullIfUnavailable', true);
         echo "set to <b>true</b>: ";
         echo "\n<!-- class output: -->\n";
-        $value = $form->getPassed('variable_is_not_set');
+        $value = $form->passed('variable_is_not_set');
         var_dump($value);
         // output: NULL
         echo "\n\n";
