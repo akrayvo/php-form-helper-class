@@ -36,19 +36,19 @@ class FormHelper
         'selectOptionValueEqualsDisplayText' => false,
 
         // trim whitespace from the beginning and end of passed values
-        // used in the getPassed() function
+        // used in the passed() function
         // false: " Joe Smith " is unchanged
         // true: " Joe Smith " is converted to "Joe Smith"
         'passedTrim' => true,
 
         // remove HTML tags and script/style blocks from a string
-        // used in the getPassed() function
+        // used in the passed() function
         // false: "Joe <b>Smith</b>" is unchanged
         // true: "Joe <b>Smith</b>" is converted to "Joe Smith"
         'passedStripTags' => true,
 
         // converts non-standard (non-ASCII) characters in passed values
-        // used in the getPassed() function
+        // used in the passed() function
         // replaces characters with equivalents when possible, 
         //  otherwise replaces the character with a dash
         // false: "© Déjà vu" is unchanged
@@ -570,10 +570,10 @@ class FormHelper
      * trim, no-trim - override the "passedTrim" setting. see setting for details
      * convert, no-convert - override the "passedConvertToStandardCharacters" setting. see setting for details
      */
-    public function getPassed($var, $flags = array())
+    public function passed($var, $flags = array())
     {
         if (empty($var)) {
-            $this->exitProgramError("no variable name passed to getPassed");
+            $this->exitProgramError("no variable name passed to passed()");
         }
 
         $processedFlags = $this->processPassedFlags($flags);
@@ -583,10 +583,10 @@ class FormHelper
     /**
      * get variables passed by POST (form)
      * 
-     * shorthand for calling getPassed with a "post" flag
-     * getPassed("name", "post") is the same as getPost("name")
+     * shorthand for calling passed with a "post" flag
+     * passed("name", "post") is the same as passedPost("name")
      */
-    public function getPost($var, $flags = array())
+    public function passedPost($var, $flags = array())
     {
         if (is_string($flags)) {
             $flags .= ', post';
@@ -597,16 +597,16 @@ class FormHelper
                 $flags = array('post');
             }
         }
-        return $this->getPassed($var, $flags);
+        return $this->passed($var, $flags);
     }
 
     /**
      * get variables passed by GET (URL query string parameters) 
      * 
-     * shorthand for calling getPassed with a "get" flag
-     * getPassed("name", "get") is the same as getGet("name")
+     * shorthand for calling passed with a "get" flag
+     * passed("name", "get") is the same as passedGet("name")
      */
-    public function getGet($var, $flags = array())
+    public function passedGet($var, $flags = array())
     {
         if (is_string($flags)) {
             $flags .= ', get';
@@ -617,7 +617,7 @@ class FormHelper
                 $flags = array('get');
             }
         }
-        return $this->getPassed($var, $flags);
+        return $this->passed($var, $flags);
     }
 
     // -----------------------------------------------------------------------------
@@ -1023,7 +1023,7 @@ class FormHelper
     /**
      * retrieve the passed value from POST, GET, or COOKIE
      * 
-     * called by getPassed, then passes the retrieved value to getPassedInternalValue
+     * called by passed, then passes the retrieved value to getPassedInternalValue
      */
     private function getPassedInternal($var, $flags = array())
     {

@@ -338,18 +338,17 @@ class FormHelper
 
 
     // Request Passed Values (used in redisplaying a form with errors or form processing)
-
-    public function getPassed($var, $flags = array())
+    public function passed($var, $flags = array())
     {
         if (empty($var)) {
-            $this->exitProgramError("no variable name passed to getPassed");
+            $this->exitProgramError("no variable name passed to passed()");
         }
 
         $processedFlags = $this->processPassedFlags($flags);
         return $this->getPassedInternal($var, $processedFlags);
     }
 
-    public function getPost($var, $flags = array())
+    public function passedPost($var, $flags = array())
     {
         if (is_string($flags)) {
             $flags .= ', post';
@@ -360,10 +359,10 @@ class FormHelper
                 $flags = array('post');
             }
         }
-        return $this->getPassed($var, $flags);
+        return $this->passed($var, $flags);
     }
 
-    public function getGet($var, $flags = array())
+    public function passedGet($var, $flags = array())
     {
         if (is_string($flags)) {
             $flags .= ', get';
@@ -374,7 +373,7 @@ class FormHelper
                 $flags = array('get');
             }
         }
-        return $this->getPassed($var, $flags);
+        return $this->passed($var, $flags);
     }
 
 

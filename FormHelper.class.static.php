@@ -336,17 +336,17 @@ class FormHelper
 
     // Request Passed Values (used in redisplaying a form with errors or form processing)
 
-    public static function getPassed($var, $flags = array())
+    public static function passed($var, $flags = array())
     {
         if (empty($var)) {
-            self::exitProgramError("no variable name passed to getPassed");
+            self::exitProgramError("no variable name passed to passed()");
         }
 
         $processedFlags = self::processPassedFlags($flags);
         return self::getPassedInternal($var, $processedFlags);
     }
 
-    public static function getPost($var, $flags = array())
+    public static function passedPost($var, $flags = array())
     {
         if (is_string($flags)) {
             $flags .= ', post';
@@ -357,10 +357,10 @@ class FormHelper
                 $flags = array('post');
             }
         }
-        return self::getPassed($var, $flags);
+        return self::passed($var, $flags);
     }
 
-    public static function getGet($var, $flags = array())
+    public static function passedGet($var, $flags = array())
     {
         if (is_string($flags)) {
             $flags .= ', get';
@@ -371,7 +371,7 @@ class FormHelper
                 $flags = array('get');
             }
         }
-        return self::getPassed($var, $flags);
+        return self::passed($var, $flags);
     }
 
 

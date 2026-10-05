@@ -26,10 +26,10 @@
     $form->updateSetting('addIdAttributeFromName', true);
 
     // get passed values. set to empty string ("") if not set. strip tags and trim
-    $full_name1 = $form->getPassed('full_name1');
-    $sport1 = $form->getPassed('sport1');
-    $comments1 = $form->getPassed('comments1');
-    $form_load_time1 = $form->getPassed('form_load_time1');
+    $full_name1 = $form->passed('full_name1');
+    $sport1 = $form->passed('sport1');
+    $comments1 = $form->passed('comments1');
+    $form_load_time1 = $form->passed('form_load_time1');
 
     if (!empty($form_load_time1)) {
         // form can be processed here

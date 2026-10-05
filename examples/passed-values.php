@@ -19,19 +19,19 @@ if (!isset($_COOKIE['getPassed_cookie_test'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HTML Form Example - getPassed</title>
+    <title>HTML Form Example - passed()</title>
     <link rel="stylesheet" href="./style.css">
 </head>
 
 <body>
-    <h1>HTML Form Example - getPassed</h1>
+    <h1>HTML Form Example - passed()</h1>
     <div><a href="./">&laquo; back to All Examples</a></div>
 
     <br>
 
     <p>
         Processing forms generally requires handling passed from POST or GET. Check that the data exists, set it to a value, and
-        manipulate it. This class does all of this using the <b>getPassed()</b> function.
+        manipulate it. This class does all of this using the <b>passed()</b> function.
     </p>
 
     <p>
@@ -87,7 +87,7 @@ if (!isset($_COOKIE['getPassed_cookie_test'])) {
 
     <h2>Functions</h2>
 
-    <h3>getPassed($variable, $flags)</h3>
+    <h3>passed($variable, $flags)</h3>
     <ul>
         <li>get variables passed by POST (form), GET (query string), or COOKIE</li>
         <li>$flags are a list of flags that determine where the data comes from and how it is processed.</li>
@@ -98,18 +98,18 @@ if (!isset($_COOKIE['getPassed_cookie_test'])) {
             $flags = array('post', 'float'); or $flags = "post float"; or $flags = "post,float";</li>
     </ul>
 
-    <h3>getPost($variable, $flags)</h3>
+    <h3>passedPost($variable, $flags)</h3>
     <ul>
         <li>get variables passed by POST (form)</li>
-        <li>shorthand for calling getPassed with a "post" flag</li>
-        <li>getPassed("name", "post") is the same as getPost("name")</li>
+        <li>shorthand for calling passed with a "post" flag</li>
+        <li>passed("name", "post") is the same as passedPost("name")</li>
     </ul>
 
-    <h3>getGet($variable, $flags)</h3>
+    <h3>passedGet($variable, $flags)</h3>
     <ul>
         <li>get variables passed by GET (URL query string parameters) </li>
-        <li>shorthand for calling getPassed with a "get" flag</li>
-        <li>getPassed("name", "get") is the same as getGet("name")</li>
+        <li>shorthand for calling passed with a "get" flag</li>
+        <li>passed("name", "get") is the same as passedGet("name")</li>
     </ul>
 
 
@@ -235,12 +235,12 @@ if (!isset($_COOKIE['getPassed_cookie_test'])) {
 
 
 
-    <?php if ($form->getPassed('post_submitted') || $form->getPassed('get_submitted')) { ?>
+    <?php if ($form->passed('post_submitted') || $form->passed('get_submitted')) { ?>
 
         <div id="form_output"></div>
         <br><br><br>
 
-        <?php if ($form->getPassed('post_submitted')) { ?>
+        <?php if ($form->passed('post_submitted')) { ?>
             <h2>POST form submitted</h2>
             <pre><?php var_dump($_POST); ?></pre>
         <?php } else { ?>
@@ -258,118 +258,118 @@ if (!isset($_COOKIE['getPassed_cookie_test'])) {
 
             <tr>
                 <td>retrieve basic_test value</td>
-                <td>$form->getPassed('basic_test');</td>
-                <td><?php var_dump($form->getPassed('basic_test')); ?></td>
+                <td>$form->passed('basic_test');</td>
+                <td><?php var_dump($form->passed('basic_test')); ?></td>
                 <td></td>
             </tr>
 
             <tr>
                 <td>retrieve number_test value</td>
-                <td>$form->getPassed('number_test');</td>
-                <td><?php var_dump($form->getPassed('number_test')); ?></td>
+                <td>$form->passed('number_test');</td>
+                <td><?php var_dump($form->passed('number_test')); ?></td>
                 <td></td>
             </tr>
             <tr>
                 <td>retrieve number_test as a float</td>
-                <td>$form->getPassed('number_test', 'float');</td>
-                <td><?php var_dump($form->getPassed('number_test', 'float')); ?></td>
+                <td>$form->passed('number_test', 'float');</td>
+                <td><?php var_dump($form->passed('number_test', 'float')); ?></td>
                 <td></td>
             </tr>
             <tr>
                 <td>retrieve number_test as an integer</td>
-                <td>$form->getPassed('number_test', 'int');</td>
-                <td><?php var_dump($form->getPassed('number_test', 'int')); ?></td>
+                <td>$form->passed('number_test', 'int');</td>
+                <td><?php var_dump($form->passed('number_test', 'int')); ?></td>
                 <td></td>
             </tr>
 
             <tr>
                 <td>retrieve test_array as an array</td>
-                <td>$form->getPassed('test_array', 'array');</td>
-                <td><?php var_dump($form->getPassed('test_array', 'array')); ?></td>
+                <td>$form->passed('test_array', 'array');</td>
+                <td><?php var_dump($form->passed('test_array', 'array')); ?></td>
                 <td>by default A, B, and D are set in the form (C is skipped)</td>
             </tr>
 
             <tr>
                 <td>retrieve whitespace_test value</td>
-                <td>$form->getPassed('whitespace_test', 'trim');</td>
-                <td><?php var_dump($form->getPassed('whitespace_test', 'trim')); ?></td>
+                <td>$form->passed('whitespace_test', 'trim');</td>
+                <td><?php var_dump($form->passed('whitespace_test', 'trim')); ?></td>
                 <td>white space is removed (default behavior, <b>trim</b> flag only needed if <b>passedTrim</b> is set to false)</td>
             </tr>
             <tr>
                 <td>retrieve whitespace_test with <b>no-trim</b> flag</td>
-                <td>$form->getPassed('whitespace_test', 'no-trim');</td>
-                <td><?php var_dump($form->getPassed('whitespace_test', 'no-trim')); ?></td>
+                <td>$form->passed('whitespace_test', 'no-trim');</td>
+                <td><?php var_dump($form->passed('whitespace_test', 'no-trim')); ?></td>
                 <td>white space is retained</td>
             </tr>
 
             <tr>
                 <td>retrieve tags_test value</td>
-                <td>$form->getPassed('tags_test', 'strip-tags');</td>
-                <td><?php var_dump($form->getPassed('tags_test', 'strip-tags')); ?></td>
+                <td>$form->passed('tags_test', 'strip-tags');</td>
+                <td><?php var_dump($form->passed('tags_test', 'strip-tags')); ?></td>
                 <td>tags are removed (default behavior, <b>strip-tags</b> flag only needed if <b>passedStripTags</b> is set to false)</td>
             </tr>
             <tr>
                 <td>retrieve tags_test with <b>no-strip-tags</b> flag</td>
-                <td>$form->getPassed('tags_test', 'no-strip-tags');</td>
-                <td><?php var_dump($form->getPassed('tags_test', 'no-strip-tags')); ?></td>
+                <td>$form->passed('tags_test', 'no-strip-tags');</td>
+                <td><?php var_dump($form->passed('tags_test', 'no-strip-tags')); ?></td>
                 <td>tags are retained. note that tags are directly output if they are not escaped, so the text will appear bold and italic in the browser</td>
             </tr>
 
             <tr>
                 <td>retrieve non_standard_test value</td>
-                <td>$form->getPassed('non_standard_test', 'no-convert');</td>
-                <td><?php var_dump($form->getPassed('non_standard_test', 'no-convert')); ?></td>
+                <td>$form->passed('non_standard_test', 'no-convert');</td>
+                <td><?php var_dump($form->passed('non_standard_test', 'no-convert')); ?></td>
                 <td>non-standard (non-ASCII) characters are retained (default behavior, <b>no-convert</b> flag only needed if <b>passedConvertToStandardCharacters</b> is set to true)</td>
             </tr>
             <tr>
                 <td>retrieve non_standard_test with <b>convert</b> flag</td>
-                <td>$form->getPassed('non_standard_test', 'no-trim');</td>
-                <td><?php var_dump($form->getPassed('non_standard_test', 'convert')); ?></td>
+                <td>$form->passed('non_standard_test', 'no-trim');</td>
+                <td><?php var_dump($form->passed('non_standard_test', 'convert')); ?></td>
                 <td>non-standard (non-ASCII) characters are replaced or removed</td>
             </tr>
 
             <tr>
                 <td>set multiple flags by array</td>
-                <td>$form->getPassed('number_test', array('post', 'int'));</td>
-                <td><?php var_dump($form->getPassed('number_test', array('post', 'int'))); ?></td>
+                <td>$form->passed('number_test', array('post', 'int'));</td>
+                <td><?php var_dump($form->passed('number_test', array('post', 'int'))); ?></td>
                 <td>will get from POST and convert to an integer. will be 0 (default value) if the GET form is submitted</td>
             </tr>
             <tr>
                 <td>set multiple flags by string</td>
-                <td>$form->getPassed('number_test', 'post,int');</td>
-                <td><?php var_dump($form->getPassed('number_test', 'post,int')); ?></td>
+                <td>$form->passed('number_test', 'post,int');</td>
+                <td><?php var_dump($form->passed('number_test', 'post,int')); ?></td>
                 <td>will get from GET and convert to an integer. will be 0 (default value) if the GET form is submitted. commas and spaces are both
                     separators, so "post,int", "post int", and "post, int" are equivalent</td>
             </tr>
 
             <tr>
                 <td>retrieve basic_test via POST</td>
-                <td>$form->getPassed('basic_test', 'post');</td>
-                <td><?php echo $form->getPassed('basic_test', 'post'); ?></td>
+                <td>$form->passed('basic_test', 'post');</td>
+                <td><?php echo $form->passed('basic_test', 'post'); ?></td>
                 <td>value set for POST form submit, blank for GET</td>
             </tr>
             <tr>
-                <td>retrieve basic_test using getPost function</td>
-                <td>$form->getPost('basic_test');</td>
-                <td><?php echo $form->getPost('basic_test'); ?></td>
-                <td>value set for POST form submit, blank for GET. identical to calling getPassed with 'post' flag</td>
+                <td>retrieve basic_test using passedPost function</td>
+                <td>$form->passedPost('basic_test');</td>
+                <td><?php echo $form->passedPost('basic_test'); ?></td>
+                <td>value set for POST form submit, blank for GET. identical to calling passed with 'post' flag</td>
             </tr>
             <tr>
                 <td>retrieve basic_test via GET</td>
-                <td>$form->getPassed('basic_test', 'get');</td>
-                <td><?php echo $form->getPassed('basic_test', 'get'); ?></td>
+                <td>$form->passed('basic_test', 'get');</td>
+                <td><?php echo $form->passed('basic_test', 'get'); ?></td>
                 <td>value set for GET form submit, blank for POST</td>
             </tr>
             <tr>
-                <td>retrieve basic_test using getGet function</td>
-                <td>$form->getGet('basic_test');</td>
-                <td><?php echo $form->getGet('basic_test'); ?></td>
-                <td>value set for GET form submit, blank for POST identical to calling getPassed with 'get' flag</td>
+                <td>retrieve basic_test using passedGet function</td>
+                <td>$form->passedGet('basic_test');</td>
+                <td><?php echo $form->passedGet('basic_test'); ?></td>
+                <td>value set for GET form submit, blank for POST identical to calling passed with 'get' flag</td>
             </tr>
             <tr>
                 <td>retrieve basic_test via COOKIE</td>
-                <td>$form->getPassed('basic_test', 'cookie');</td>
-                <td><?php echo $form->getPassed('basic_test', 'cookie'); ?></td>
+                <td>$form->passed('basic_test', 'cookie');</td>
+                <td><?php echo $form->passed('basic_test', 'cookie'); ?></td>
                 <td>blank for this example because no COOKIE value named basic_test is set; the cookie flag retrieves only the COOKIE value.</td>
             </tr>
         </table>
