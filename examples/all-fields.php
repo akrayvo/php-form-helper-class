@@ -13,25 +13,25 @@ $form->updateSetting('addIdAttributeFromName', true);
 
 // get information passed from the form, values will be used as 
 // 		defaults in the form when the page reloads
-$first_name = $form->getPassed('first_name');
-$favorite_color = $form->getPassed('favorite_color');
-$favorite_number = $form->getPassed('favorite_number');
-$secret_code = $form->getPassed('secret_code');
-$form_rating = $form->getPassed('form_rating');
-$email_address = $form->getPassed('email_address');
-$phone_number = $form->getPassed('phone_number');
-$next_birthday = $form->getPassed('next_birthday');
-$hobby_movies = $form->getPassed('hobby_movies');
-$hobby_sports = $form->getPassed('hobby_sports');
-$hobby_books = $form->getPassed('hobby_books');
-$movie  = $form->getPassed('movie');
-$comments  = $form->getPassed('comments');
-$city  = $form->getPassed('city');
-$state  = $form->getPassed('state');
-$show  = $form->getPassed('show');
+$first_name = $form->passed('first_name');
+$favorite_color = $form->passed('favorite_color');
+$favorite_number = $form->passed('favorite_number');
+$secret_code = $form->passed('secret_code');
+$form_rating = $form->passed('form_rating');
+$email_address = $form->passed('email_address');
+$phone_number = $form->passed('phone_number');
+$next_birthday = $form->passed('next_birthday');
+$hobby_movies = $form->passed('hobby_movies');
+$hobby_sports = $form->passed('hobby_sports');
+$hobby_books = $form->passed('hobby_books');
+$movie  = $form->passed('movie');
+$comments  = $form->passed('comments');
+$city  = $form->passed('city');
+$state  = $form->passed('state');
+$show  = $form->passed('show');
 $form_start_time = date('m/d/Y h:i:s A');
-$food = $form->getPassed('food');
-$favoriteUrl = $form->getPassed('favoriteUrl');
+$food = $form->passed('food');
+$favoriteUrl = $form->passed('favoriteUrl');
 
 ?><!DOCTYPE html>
 <html lang="en">
