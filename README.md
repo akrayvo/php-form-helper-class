@@ -25,9 +25,9 @@ require_once('../FormHelper.class.php');
 $form = new FormHelper();
 
 // get the value passed to the page. check both $_POST and $_GET.
-$name = $form->getPassed('name');
-$sport = $form->getPassed('sport');
-$comments = $form->getPassed('comments');
+$name = $form->passed('name');
+$sport = $form->passed('sport');
+$comments = $form->passed('comments');
 
 // hard-coded options for select (dropdown menu) field
 // in actual usage, this data could also come from a database or data file
@@ -99,7 +99,7 @@ if (isset($_POST['full_name'])) {
 with class
 ```
 <?php
-$full_name = $form->getPassed('full_name');
+$full_name = $form->passed('full_name');
 ?>
 ```
 
@@ -196,13 +196,13 @@ $form->updateSetting('passedStripTags', false);
 // addIdAttributeFromName = false
 // trying to retrieve a passed variable with invalid parameters (both POST and GET)
 $form->updateSetting('exitProgramOnFailure', false);
-$name = $form->getPassed('first_name', array('post','get'));
+$name = $form->passed('first_name', array('post','get'));
 // despite error, program will continue with no output error message
 
 // addIdAttributeFromName = true
 // trying to retrieve a passed variable with invalid parameters (both POST and GET)
 $form->updateSetting('exitProgramOnFailure', true);
-$name = $form->getPassed('first_name', array('post','get'));
+$name = $form->passed('first_name', array('post','get'));
 // will output an error message and end the program
 ```
 
@@ -226,45 +226,45 @@ $form->select('state', $options);
 
 ### passedTrim
 * trim whitespace from the beginning and end of passed values
-* used in the getPassed() function
+* used in the passed() function
 * default = true
 ```
 // my_text = "  My Text  " was passed from form
 
 // passedTrim = false | beginning and end whitespace will be retained
 $form->updateSetting('passedTrim', false);
-var_dump($form->getPassed("my_text"));
+var_dump($form->passed("my_text"));
 // output string(11) "   My Text   "
 
 // passedTrim = true | beginning and end whitespace will be removed
 $form->updateSetting('passedTrim', true);
-var_dump($form->getPassed("my_text"));
+var_dump($form->passed("my_text"));
 // output string(7) "My Text"
 ```
 
 
 ### passedStripTags
 * remove HTML tags and script/style blocks from a string
-* used in the getPassed() function
+* used in the passed() function
 * default = true
 ```
 // my_text = "<b><i>My Text</i></b>" was passed from form
 
 // passedStripTags = false | HTML tags will be retained
 $form->updateSetting('passedStripTags', false);
-var_dump($form->getPassed("my_text"));
+var_dump($form->passed("my_text"));
 // output string(21) "<b><i>My Text</i></b>"
 
 // passedStripTags = true | HTML tags will be removed
 $form->updateSetting('passedStripTags', true);
-var_dump($form->getPassed("my_text"));
+var_dump($form->passed("my_text"));
 // output string(7) "My Text"
 ```
 
 
 ### passedConvertToStandardCharacters
 * converts non-standard (non-ASCII) characters in passed values
-* used in the getPassed() function
+* used in the passed() function
 * replaces characters with equivalents when possible, otherwise replaces the character with a dash
 * default = false
 ```
@@ -272,19 +272,19 @@ var_dump($form->getPassed("my_text"));
 
 // passedConvertToStandardCharacters = false | non-standard will be retained
 $form->updateSetting('passedConvertToStandardCharacters', false);
-var_dump($form->getPassed("my_text"));
+var_dump($form->passed("my_text"));
 // output string(9) "Déjà Vu"
 
 // passedConvertToStandardCharacters = true | non-standard will be replaced
 $form->updateSetting('passedConvertToStandardCharacters', true);
-var_dump($form->getPassed("my_text"));
+var_dump($form->passed("my_text"));
 // output string(7) "Deja Vu"
 ```
 
 
 ### returnNullIfUnavailable
 * when retrieving a passed value, return NULL when variable is not available (not set or invalid)
-* used in the getPassed() function
+* used in the passed() function
 * by default, when a variable is not set, the return value is "" (empty string), 0, or an empty array depending on if a flag is set to return as an int, float, or array. if returnNullIfUnavailable is set to true, null will be returned instead
 * will also return NULL when a variable doesn't match the settings. for instance, the 'array' flag is set, but the value is not an array
 * default = false
@@ -293,13 +293,13 @@ var_dump($form->getPassed("my_text"));
 
 // returnNullIfUnavailable = false
 $form->updateSetting('returnNullIfUnavailable', false);
-$value = $form->getPassed('variable_is_not_set');
+$value = $form->passed('variable_is_not_set');
 var_dump($value);
 // output: string(0) ""
 
 // returnNullIfUnavailable = true
 $form->updateSetting('returnNullIfUnavailable', true);
-$value = $form->getPassed('variable_is_not_set');
+$value = $form->passed('variable_is_not_set');
 var_dump($value);
 // output: NULL
 ```
@@ -361,9 +361,9 @@ HTML output
 
 Processing forms generally requires handling data passed from POST or GET. These functions check that passed data exists, get the value, manipulate it, and return it.
 
-* `getPassed($var, $flags = array())` - get variable passed through POST, GET, or COOKIE. by default will check POST and return the value if set, then check GET and return the value if set. a COOKIE value is only returned when the `cookie` flag is set 
-* `getPost($var, $flags = array())` - get variable passed through POST
-* `getGet($var, $flags = array())` - get variable passed through GET
+* `passed($var, $flags = array())` - get variable passed through POST, GET, or COOKIE. by default will check POST and return the value if set, then check GET and return the value if set. a COOKIE value is only returned when the `cookie` flag is set 
+* `passedPost($var, $flags = array())` - get variable passed through POST
+* `passedGet($var, $flags = array())` - get variable passed through GET
 
 # Flags
 * `post` - retrieve the variable from POST only
@@ -387,9 +387,9 @@ Processing forms generally requires handling data passed from POST or GET. These
 ### String Manipulation
 * `htmlEscape($string)` - escape a string to display in HTML
 ### Get Passed Data
-* `getPassed($var, $flags = array())` - retrieve a value from $_GET, $_POST, or $_COOKIE. default functionality is check $_POST, then check $_GET
-* `getPost($var, $flags = array())` - retrieve a value from $_POST
-* `getGet($var, $flags = array())` - retrieve a value from $_GET
+* `passed($var, $flags = array())` - retrieve a value from $_GET, $_POST, or $_COOKIE. default functionality is check $_POST, then check $_GET
+* `passedPost($var, $flags = array())` - retrieve a value from $_POST
+* `passedGet($var, $flags = array())` - retrieve a value from $_GET
 ### input elements
 * `hidden($name, $value = '', $moreAttributes = array())` - `<input type="hidden">`
 * `text($name, $value = '', $moreAttributes = array())` - `<input type="text">`

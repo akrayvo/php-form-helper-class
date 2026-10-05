@@ -6,9 +6,9 @@ require_once('../FormHelper.class.php');
 $form = new FormHelper();
 
 // get the value passed to the page. check both $_POST and $_GET
-$name = $form->getPassed('name');
-$sport = $form->getPassed('sport');
-$comments = $form->getPassed('comments');
+$name = $form->passed('name');
+$sport = $form->passed('sport');
+$comments = $form->passed('comments');
 
 // hard-coded options for select (dropdown menu) field
 // in actual usage, this data could also come from a database or data file
